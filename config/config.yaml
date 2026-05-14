@@ -1,0 +1,57 @@
+vqvae:
+  T: 60
+  F: 5
+  d: 64
+  K: 256
+  beta: 0.25
+  ema_decay: 0.99
+  ema_epsilon: 0.00001
+  epochs: 80
+  batch_size: 256
+  lr: 0.0002
+  train_split: 0.85
+
+index:
+  type: hnsw
+  hnsw_M: 16
+  hnsw_ef_construction: 200
+  hnsw_ef_search: 64
+  ivf_nlist: 64
+  ivf_nprobe: 8
+  flush_threshold: 100000
+  staging_max_size: 10000
+
+hqo:
+  alpha: 5
+  default_recall: 0.95
+  vector_scan_cost_per_row: 1.0
+  filter_cost_per_row: 0.1
+  fused_cost_per_row: 0.6
+
+codebook:
+  entropy_min_ratio: 0.5
+  recon_error_max_delta: 0.30
+  retrain_window_days: 1095
+
+data:
+  tickers:
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - NVDA
+    - META
+    - TSLA
+    - JPM
+    - V
+    - UNH
+  db_path: data/quantdb.duckdb
+  raw_path: data/raw
+  encoded_path: data/encoded
+  models_path: models
+  logs_path: logs
+
+demo:
+  api_host: 127.0.0.1
+  api_port: 8000
+  streamlit_port: 8501
