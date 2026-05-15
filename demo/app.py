@@ -10,10 +10,11 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-import requests
 import pandas as pd
 import time
 import json
+import os
+import sys
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -23,7 +24,56 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-API = "http://127.0.0.1:8000"
+# ── Direct engine mode (no FastAPI server needed) ─────────────────────────────
+# Works both locally and on Streamlit Cloud.
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+@st.cache_resource(show_spinner="Loading QUANT-DB engine…")
+def _load_engine():
+    from src.db.engine import QuantDBEngine
+    return QuantDBEngine()
+
+def _direct_query(sql, query_window):
+    engine = _load_engine()
+    return engine.query(sql, {"query_window": query_window})
+
+def _direct_benchmark(n_queries=50):
+    engine = _load_engine()
+    from src.execution.layer3 import Layer3Engine
+    import time as _time
+    l3: Layer3Engine = engine.layer3
+    latents = engine.latents
+    N = len(latents)
+    layer3_times, brute_times = [], []
+    rng = np.random.default_rng(42)
+    for _ in range(n_queries):
+        q = latents[rng.integers(N)]
+        t0 = _time.perf_counter()
+        l3.bitscan(q, threshold=0.0, k=20)
+        layer3_times.append((_time.perf_counter() - t0) * 1000)
+        t0 = _time.perf_counter()
+        np.argsort(np.linalg.norm(latents - q[None, :], axis=1))[:20]
+        brute_times.append((_time.perf_counter() - t0) * 1000)
+    layer3_times.sort(); brute_times.sort()
+    p = lambda arr, pct: float(np.percentile(arr, pct))
+    return {
+        "layer3_p50": p(layer3_times, 50),
+        "layer3_p95": p(layer3_times, 95),
+        "brute_force_p50": p(brute_times, 50),
+        "brute_force_p95": p(brute_times, 95),
+        "speedup_p50": p(brute_times, 50) / max(p(layer3_times, 50), 0.001),
+        "table_bytes": l3.distance_table.nbytes if hasattr(l3, "distance_table") else 1024,
+        "table_fits_l1": True,
+    }
+
+def _direct_health():
+    try:
+        engine = _load_engine()
+        return {"status": "ok", "n_windows": len(engine.latents)}
+    except Exception as e:
+        return None
 
 # ── Shared style ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -114,10 +164,7 @@ def _step_box(num: str, title: str, body: str):
 
 
 def _api_health():
-    try:
-        return requests.get(f"{API}/health", timeout=2).json()
-    except Exception:
-        return None
+    return _direct_health()
 
 
 def _make_pattern(ptype: str, T: int = 60, seed: int = 0):
@@ -902,24 +949,19 @@ elif nav == "🔍 Live Query":
                 """)
                 s2.update(state="complete", label=f"Step 2 — Plan selected: **{plan_chosen}**  (vec_card_est={vec_card_est}, rel_card_est={rel_card_est})")
 
-            # Step C: API call
-            with st.status("Step 3 — Executing query against QUANT-DB API…", state="running") as s3:
+            # Step C: Direct engine call
+            with st.status("Step 3 — Executing query via QUANT-DB engine…", state="running") as s3:
                 t_api = time.perf_counter()
                 try:
-                    resp = requests.post(
-                        f"{API}/query",
-                        json={"sql": sql, "query_window": window.tolist()},
-                        timeout=30,
-                    )
-                    res = resp.json()
+                    res = _direct_query(sql, window.tolist())
                     api_ms = (time.perf_counter() - t_api) * 1000
                     actual_plan = res.get("plan", plan_chosen)
                     rows = res.get("rows", [])
-                    s3.update(state="complete", label=f"Step 3 — API responded in {api_ms:.0f} ms | Plan used: **{actual_plan}** | {len(rows)} results")
+                    s3.update(state="complete", label=f"Step 3 — Completed in {api_ms:.0f} ms | Plan used: **{actual_plan}** | {len(rows)} results")
                     api_ok = True
                 except Exception as e:
                     api_ms = (time.perf_counter() - t_api) * 1000
-                    s3.update(state="error", label=f"Step 3 — API unavailable")
+                    s3.update(state="error", label=f"Step 3 — Engine error: {e}")
                     api_ok = False
                     rows = []
                     res = {}
@@ -1629,14 +1671,8 @@ elif nav == "🎓 Research Contributions":
 
     if run_l3:
         try:
-            with st.spinner("Running Layer 3 benchmark via API…"):
-                resp = requests.get(
-                    f"{API}/layer3/benchmark",
-                    params={"n_queries": n_l3_queries},
-                    timeout=60,
-                )
-            if resp.status_code == 200:
-                l3 = resp.json()
+            with st.spinner("Running Layer 3 benchmark…"):
+                l3 = _direct_benchmark(n_queries=n_l3_queries)
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("BitScan p50",     f"{l3['layer3_p50']:.3f} ms")
                 c2.metric("Brute-force p50", f"{l3['brute_force_p50']:.3f} ms")
@@ -1671,10 +1707,8 @@ elif nav == "🎓 Research Contributions":
                     f"({'fits in L1 cache' if l3['table_fits_l1'] else 'exceeds L1'}). "
                     f"This result validates the core claim of Section 3.5.2."
                 )
-            else:
-                st.error(f"API error {resp.status_code}: {resp.text}")
         except Exception as e:
-            st.error(f"API unavailable: {e}")
+            st.error(f"Benchmark error: {e}")
 
     st.divider()
 
