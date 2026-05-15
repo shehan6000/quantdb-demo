@@ -45,14 +45,20 @@ def _direct_benchmark(n_queries=50):
     engine = _load_engine()
     l3 = engine.layer3
     all_ids, all_lats = engine.store.get_all_latents()
+    all_codes = engine.store.get_codes_by_ids(all_ids)
     N = len(all_lats)
     layer3_times, brute_times = [], []
     rng = np.random.default_rng(42)
     for _ in range(n_queries):
-        q = all_lats[rng.integers(N)]
+        q = all_lats[int(rng.integers(N))]
         t0 = time.perf_counter()
         l3.prepare(q)
-        l3.execute_bit_scan(k=20)
+        l3.execute_bit_scan(
+            codes=all_codes,
+            row_ids=all_ids,
+            threshold=0.0,
+            top_k=20,
+        )
         layer3_times.append((time.perf_counter() - t0) * 1000)
         t0 = time.perf_counter()
         np.argsort(np.linalg.norm(all_lats - q[None, :], axis=1))[:20]
