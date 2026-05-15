@@ -32,8 +32,8 @@ if _ROOT not in sys.path:
 
 @st.cache_resource(show_spinner="Loading QUANT-DB engine…")
 def _load_engine():
-    from src.db.engine import QuantDBEngine
-    return QuantDBEngine()
+    from src.db.engine import QuantDB
+    return QuantDB()
 
 def _direct_query(sql, query_window):
     engine = _load_engine()
@@ -41,38 +41,38 @@ def _direct_query(sql, query_window):
 
 def _direct_benchmark(n_queries=50):
     engine = _load_engine()
-    from src.execution.layer3 import Layer3Engine
-    import time as _time
-    l3: Layer3Engine = engine.layer3
-    latents = engine.latents
-    N = len(latents)
+    l3 = engine.layer3
+    all_ids, all_lats = engine.store.get_all_latents()
+    N = len(all_lats)
     layer3_times, brute_times = [], []
     rng = np.random.default_rng(42)
     for _ in range(n_queries):
-        q = latents[rng.integers(N)]
-        t0 = _time.perf_counter()
-        l3.bitscan(q, threshold=0.0, k=20)
-        layer3_times.append((_time.perf_counter() - t0) * 1000)
-        t0 = _time.perf_counter()
-        np.argsort(np.linalg.norm(latents - q[None, :], axis=1))[:20]
-        brute_times.append((_time.perf_counter() - t0) * 1000)
-    layer3_times.sort(); brute_times.sort()
+        q = all_lats[rng.integers(N)]
+        t0 = time.perf_counter()
+        l3.prepare(q)
+        l3.execute_bit_scan(k=20)
+        layer3_times.append((time.perf_counter() - t0) * 1000)
+        t0 = time.perf_counter()
+        np.argsort(np.linalg.norm(all_lats - q[None, :], axis=1))[:20]
+        brute_times.append((time.perf_counter() - t0) * 1000)
     p = lambda arr, pct: float(np.percentile(arr, pct))
+    tbl = l3.dist_table
     return {
-        "layer3_p50": p(layer3_times, 50),
-        "layer3_p95": p(layer3_times, 95),
+        "layer3_p50":      p(layer3_times, 50),
+        "layer3_p95":      p(layer3_times, 95),
         "brute_force_p50": p(brute_times, 50),
         "brute_force_p95": p(brute_times, 95),
-        "speedup_p50": p(brute_times, 50) / max(p(layer3_times, 50), 0.001),
-        "table_bytes": l3.distance_table.nbytes if hasattr(l3, "distance_table") else 1024,
-        "table_fits_l1": True,
+        "speedup_p50":     p(brute_times, 50) / max(p(layer3_times, 50), 0.001),
+        "table_bytes":     tbl.size_bytes() if hasattr(tbl, "size_bytes") else 1024,
+        "table_fits_l1":   tbl.fits_in_l1() if hasattr(tbl, "fits_in_l1") else True,
     }
 
 def _direct_health():
     try:
         engine = _load_engine()
-        return {"status": "ok", "n_windows": len(engine.latents)}
-    except Exception as e:
+        _, all_lats = engine.store.get_all_latents()
+        return {"status": "ok", "n_windows": len(all_lats)}
+    except Exception:
         return None
 
 # ── Shared style ──────────────────────────────────────────────────────────────
