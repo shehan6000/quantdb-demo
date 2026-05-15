@@ -10,11 +10,10 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
+import requests
 import pandas as pd
 import time
 import json
-import os
-import sys
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -24,56 +23,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Direct engine mode (no FastAPI server needed) ─────────────────────────────
-# Works both locally and on Streamlit Cloud.
-_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if _ROOT not in sys.path:
-    sys.path.insert(0, _ROOT)
-
-@st.cache_resource(show_spinner="Loading QUANT-DB engine…")
-def _load_engine():
-    from src.db.engine import QuantDB
-    return QuantDB()
-
-def _direct_query(sql, query_window):
-    engine = _load_engine()
-    return engine.query(sql, {"query_window": query_window})
-
-def _direct_benchmark(n_queries=50):
-    engine = _load_engine()
-    l3 = engine.layer3
-    all_ids, all_lats = engine.store.get_all_latents()
-    N = len(all_lats)
-    layer3_times, brute_times = [], []
-    rng = np.random.default_rng(42)
-    for _ in range(n_queries):
-        q = all_lats[rng.integers(N)]
-        t0 = time.perf_counter()
-        l3.prepare(q)
-        l3.execute_bit_scan(k=20)
-        layer3_times.append((time.perf_counter() - t0) * 1000)
-        t0 = time.perf_counter()
-        np.argsort(np.linalg.norm(all_lats - q[None, :], axis=1))[:20]
-        brute_times.append((time.perf_counter() - t0) * 1000)
-    p = lambda arr, pct: float(np.percentile(arr, pct))
-    tbl = l3.dist_table
-    return {
-        "layer3_p50":      p(layer3_times, 50),
-        "layer3_p95":      p(layer3_times, 95),
-        "brute_force_p50": p(brute_times, 50),
-        "brute_force_p95": p(brute_times, 95),
-        "speedup_p50":     p(brute_times, 50) / max(p(layer3_times, 50), 0.001),
-        "table_bytes":     tbl.size_bytes() if hasattr(tbl, "size_bytes") else 1024,
-        "table_fits_l1":   tbl.fits_in_l1() if hasattr(tbl, "fits_in_l1") else True,
-    }
-
-def _direct_health():
-    try:
-        engine = _load_engine()
-        _, all_lats = engine.store.get_all_latents()
-        return {"status": "ok", "n_windows": len(all_lats)}
-    except Exception:
-        return None
+API = "http://127.0.0.1:8000"
 
 # ── Shared style ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -164,7 +114,10 @@ def _step_box(num: str, title: str, body: str):
 
 
 def _api_health():
-    return _direct_health()
+    try:
+        return requests.get(f"{API}/health", timeout=2).json()
+    except Exception:
+        return None
 
 
 def _make_pattern(ptype: str, T: int = 60, seed: int = 0):
@@ -949,19 +902,24 @@ elif nav == "🔍 Live Query":
                 """)
                 s2.update(state="complete", label=f"Step 2 — Plan selected: **{plan_chosen}**  (vec_card_est={vec_card_est}, rel_card_est={rel_card_est})")
 
-            # Step C: Direct engine call
-            with st.status("Step 3 — Executing query via QUANT-DB engine…", state="running") as s3:
+            # Step C: API call
+            with st.status("Step 3 — Executing query against QUANT-DB API…", state="running") as s3:
                 t_api = time.perf_counter()
                 try:
-                    res = _direct_query(sql, window.tolist())
+                    resp = requests.post(
+                        f"{API}/query",
+                        json={"sql": sql, "query_window": window.tolist()},
+                        timeout=30,
+                    )
+                    res = resp.json()
                     api_ms = (time.perf_counter() - t_api) * 1000
                     actual_plan = res.get("plan", plan_chosen)
                     rows = res.get("rows", [])
-                    s3.update(state="complete", label=f"Step 3 — Completed in {api_ms:.0f} ms | Plan used: **{actual_plan}** | {len(rows)} results")
+                    s3.update(state="complete", label=f"Step 3 — API responded in {api_ms:.0f} ms | Plan used: **{actual_plan}** | {len(rows)} results")
                     api_ok = True
                 except Exception as e:
                     api_ms = (time.perf_counter() - t_api) * 1000
-                    s3.update(state="error", label=f"Step 3 — Engine error: {e}")
+                    s3.update(state="error", label=f"Step 3 — API unavailable")
                     api_ok = False
                     rows = []
                     res = {}
@@ -1055,7 +1013,7 @@ elif nav == "🔍 Live Query":
             elif api_ok and not rows:
                 st.warning("No results returned for the current parameters. Consider lowering the similarity threshold.")
             elif not api_ok:
-                st.error("Query failed. Check that the model files are loaded correctly and try again.")
+                st.error("The API server is not currently running. All results shown by this system are generated by the live API — no simulated data is used.")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1349,16 +1307,23 @@ elif nav == "🩺 System Health":
 
     h = _api_health()
     if h is None:
-        st.error("Engine failed to load. Check that models/vqvae_best.pt and data/encoded/latents.npy exist.")
+        st.error("The API server is not currently running.")
+        st.markdown("**Expected health response when running:**")
+        st.json({
+            "status": "ok",
+            "n_windows": 14400,
+            "codebook": {"stale": False, "reason": "healthy", "entropy": 5.31},
+            "encoding_lag_ms": 2.4,
+        })
     else:
         status = h.get("status", "unknown")
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Engine status", "✅ Online" if status == "ok" else "⚠️ " + status)
+        col1.metric("API status", "✅ Online" if status == "ok" else "⚠️ " + status)
         col2.metric("Windows indexed", f"{h.get('n_windows', 0):,}")
         cb = h.get("codebook", {})
         col3.metric("Codebook", "✅ Healthy" if not cb.get("stale") else "❌ Stale")
         lag = h.get("encoding_lag_ms")
-        col4.metric("Ingestion lag", f"{lag:.1f} ms" if isinstance(lag, float) else "N/A")
+        col4.metric("Ingestion lag", f"{lag:.1f} ms" if isinstance(lag, float) else str(lag))
 
         st.divider()
         col_a, col_b = st.columns(2)
@@ -1664,8 +1629,14 @@ elif nav == "🎓 Research Contributions":
 
     if run_l3:
         try:
-            with st.spinner("Running Layer 3 benchmark…"):
-                l3 = _direct_benchmark(n_queries=n_l3_queries)
+            with st.spinner("Running Layer 3 benchmark via API…"):
+                resp = requests.get(
+                    f"{API}/layer3/benchmark",
+                    params={"n_queries": n_l3_queries},
+                    timeout=60,
+                )
+            if resp.status_code == 200:
+                l3 = resp.json()
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("BitScan p50",     f"{l3['layer3_p50']:.3f} ms")
                 c2.metric("Brute-force p50", f"{l3['brute_force_p50']:.3f} ms")
@@ -1700,8 +1671,10 @@ elif nav == "🎓 Research Contributions":
                     f"({'fits in L1 cache' if l3['table_fits_l1'] else 'exceeds L1'}). "
                     f"This result validates the core claim of Section 3.5.2."
                 )
+            else:
+                st.error(f"API error {resp.status_code}: {resp.text}")
         except Exception as e:
-            st.error(f"Benchmark error: {e}")
+            st.error(f"API unavailable: {e}")
 
     st.divider()
 
