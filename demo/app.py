@@ -37,6 +37,8 @@ def _load_engine():
 
 def _direct_query(sql, query_window):
     engine = _load_engine()
+    if not isinstance(query_window, np.ndarray):
+        query_window = np.array(query_window, dtype=np.float32)
     return engine.query(sql, {"query_window": query_window})
 
 def _direct_benchmark(n_queries=50):
@@ -953,7 +955,7 @@ elif nav == "🔍 Live Query":
             with st.status("Step 3 — Executing query via QUANT-DB engine…", state="running") as s3:
                 t_api = time.perf_counter()
                 try:
-                    res = _direct_query(sql, window.tolist())
+                    res = _direct_query(sql, window)
                     api_ms = (time.perf_counter() - t_api) * 1000
                     actual_plan = res.get("plan", plan_chosen)
                     rows = res.get("rows", [])
