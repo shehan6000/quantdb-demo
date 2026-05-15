@@ -73,8 +73,35 @@ def _direct_health():
     try:
         engine = _load_engine()
         _, all_lats = engine.store.get_all_latents()
-        return {"status": "ok", "n_windows": len(all_lats)}
-    except Exception:
+        n = len(all_lats)
+
+        # Codebook entropy from code assignments
+        index_path = os.path.join(_ROOT, "data", "encoded", "indices.npy")
+        cb_info = {}
+        if os.path.exists(index_path):
+            idxs = np.load(index_path).flatten().astype(int)
+            counts = np.bincount(idxs, minlength=256)
+            p = counts / (counts.sum() + 1e-9)
+            p = p[p > 0]
+            H = float(-np.sum(p * np.log(p + 1e-12)))
+            H_max = float(np.log(256))
+            utilisation = H / H_max
+            cb_info = {
+                "entropy":    round(H, 4),
+                "entropy_max": round(H_max, 4),
+                "utilisation_pct": round(utilisation * 100, 1),
+                "stale":      utilisation < 0.4,
+                "reason":     "healthy" if utilisation >= 0.7 else
+                              "degraded" if utilisation >= 0.4 else "collapsed",
+            }
+
+        return {
+            "status":       "ok",
+            "n_windows":    n,
+            "codebook":     cb_info,
+            "encoding_lag_ms": None,
+        }
+    except Exception as e:
         return None
 
 # ── Shared style ──────────────────────────────────────────────────────────────
@@ -1367,8 +1394,7 @@ elif nav == "🩺 System Health":
         with col_a:
             st.subheader("Codebook health")
             if cb.get("entropy"):
-                H = cb["entropy"]; H_max = np.log(256)
-                pct = H / H_max * 100
+                pct = cb.get("utilisation_pct", cb["entropy"] / np.log(256) * 100)
                 fig = go.Figure(go.Indicator(
                     mode="gauge+number",
                     value=pct,
