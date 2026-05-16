@@ -42,38 +42,18 @@ def _direct_query(sql, query_window):
     return engine.query(sql, {"query_window": query_window})
 
 def _direct_benchmark(n_queries=50):
-    engine = _load_engine()
-    l3 = engine.layer3
-    all_ids, all_lats = engine.store.get_all_latents()
-    all_codes = engine.store.get_codes_by_ids(all_ids)
-    N = len(all_lats)
-    layer3_times, brute_times = [], []
-    rng = np.random.default_rng(42)
-    for _ in range(n_queries):
-        q = all_lats[int(rng.integers(N))]
-        t0 = time.perf_counter()
-        l3.prepare(q)
-        l3.execute_bit_scan(
-            codes=all_codes,
-            row_ids=all_ids,
-            threshold=0.0,
-            top_k=20,
-        )
-        layer3_times.append((time.perf_counter() - t0) * 1000)
-        t0 = time.perf_counter()
-        np.argsort(np.linalg.norm(all_lats - q[None, :], axis=1))[:20]
-        brute_times.append((time.perf_counter() - t0) * 1000)
-    p = lambda arr, pct: float(np.percentile(arr, pct))
-    tbl = l3.dist_table
-    return {
-        "layer3_p50":      p(layer3_times, 50),
-        "layer3_p95":      p(layer3_times, 95),
-        "brute_force_p50": p(brute_times, 50),
-        "brute_force_p95": p(brute_times, 95),
-        "speedup_p50":     p(brute_times, 50) / max(p(layer3_times, 50), 0.001),
-        "table_bytes":     tbl.size_bytes() if hasattr(tbl, "size_bytes") else 1024,
-        "table_fits_l1":   tbl.fits_in_l1() if hasattr(tbl, "fits_in_l1") else True,
-    }
+    """
+    Calls engine.benchmark_layer3() which wraps benchmark_layer3_vs_brute_force()
+    with the correct arguments already assembled from the engine's own store:
+        codebook  (K, d)  float32  — from model.quantizer.codebook.weight
+        all_codes (N, L)  uint16   — from store.get_codes_by_ids(all_ids)
+        all_lats  (N, d)  float32  — from store.get_all_latents()
+        row_ids   (N,)    int64    — from store.get_all_latents()
+    Returns: layer3_p50, layer3_p95, brute_force_p50, brute_force_p95,
+             speedup_p50, speedup_p95, table_bytes, table_fits_l1
+    """
+    return _load_engine().benchmark_layer3(n_queries=n_queries)
+
 
 def _direct_health():
     try:
