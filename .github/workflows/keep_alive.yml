@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Streamlit app
-        run: curl -s -o /dev/null -w "%{http_code}" https://YOUR-APP-URL.streamlit.app
+        run: curl -s -o /dev/null -w "%{http_code}" https://quantdb-demo-lbbhtnzx7h7r3b32brsa2k.streamlit.app/
