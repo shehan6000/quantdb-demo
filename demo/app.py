@@ -3623,62 +3623,259 @@ LIMIT    20;
 
     st.divider()
 
-    # ── Novel intersection diagram ─────────────────────────────────────────────
+ # ── Novel intersection diagram ─────────────────────────────────────────────
     st.subheader("🎯 The Unoccupied Intersection")
     st.markdown("""
-    Each existing system occupies at most two of these four dimensions simultaneously.
-    QUANT-DB is the only system at the intersection of all four.
-    """)
+Each existing system occupies at most two of the four dimensions that define
+the QUANT-DB problem space simultaneously. The radar chart below makes this
+gap visible: QUANT-DB is the only system that reaches the outer boundary on
+all four axes at once.
+""")
 
-    intersection_data = {
-        "System": [
-            "pgvector","Pinecone","Weaviate","Milvus",
-            "Filtered-DiskANN","DTW","Pandas+Python","QUANT-DB"
-        ],
-        "SQL interface\n(0–1)":          [1, 0, 0, 0, 0, 0, 0, 1],
-        "Domain compression\n(0–1)":     [0, 0, 0, 0, 0, 0, 0, 1],
-        "Hybrid cost model\n(0–1)":      [0, 0, 0, 0.3, 0, 0, 0, 1],
-        "Hardware-aware\n(0–1)":         [0, 0, 0, 0.2, 0.3, 0, 0, 1],
+    # ── Dimension definitions ─────────────────────────────────────────────────
+    # Each dimension is scored 0.0–1.0:
+    #   SQL interface          — does it expose a standard SQL query interface?
+    #   Domain compression     — does it apply domain-specific compression to vectors?
+    #   Hybrid cost model      — does it jointly optimise vector + relational predicates?
+    #   Hardware-aware kernel  — does it exploit L1 cache / SIMD for inner-loop distance?
+
+    systems = {
+        "pgvector":          [1.0,  0.0,  0.0,  0.0],
+        "Pinecone":          [0.0,  0.0,  0.0,  0.0],
+        "Weaviate":          [0.0,  0.0,  0.1,  0.0],
+        "Milvus":            [0.0,  0.0,  0.3,  0.2],
+        "Filtered-DiskANN":  [0.0,  0.0,  0.0,  0.3],
+        "DTW / UCR Suite":   [0.0,  0.0,  0.0,  0.0],
+        "Pandas + Python":   [0.0,  0.1,  0.0,  0.0],
+        "QUANT-DB":          [1.0,  1.0,  1.0,  1.0],
     }
 
-    dims = ["SQL interface\n(0–1)", "Domain compression\n(0–1)",
-            "Hybrid cost model\n(0–1)", "Hardware-aware\n(0–1)"]
-    colors = ["#4a4a6a","#4a4a6a","#4a4a6a","#4a4a6a",
-              "#4a4a6a","#4a4a6a","#4a4a6a","#26a641"]
-    widths = [1,1,1,1,1,1,1,3]
+    dims = [
+        "SQL interface",
+        "Domain compression",
+        "Hybrid cost model",
+        "Hardware-aware kernel",
+    ]
+
+    # Visual styling per system
+    style = {
+        "pgvector":         dict(color="#6a7fbf", width=1.5, dash="dot",   opacity=0.6, fill=False),
+        "Pinecone":         dict(color="#5a6a7f", width=1.5, dash="dot",   opacity=0.5, fill=False),
+        "Weaviate":         dict(color="#7f6a5a", width=1.5, dash="dot",   opacity=0.5, fill=False),
+        "Milvus":           dict(color="#9f7f3a", width=1.5, dash="dash",  opacity=0.6, fill=False),
+        "Filtered-DiskANN": dict(color="#7f5a9f", width=1.5, dash="dash",  opacity=0.6, fill=False),
+        "DTW / UCR Suite":  dict(color="#4a7f6a", width=1.5, dash="dot",   opacity=0.5, fill=False),
+        "Pandas + Python":  dict(color="#5a5a5a", width=1.5, dash="dot",   opacity=0.5, fill=False),
+        "QUANT-DB":         dict(color="#26a641", width=3.5, dash="solid", opacity=1.0, fill=True),
+    }
 
     fig_radar = go.Figure()
-    for i, system in enumerate(intersection_data["System"]):
-        values = [intersection_data[d][i] for d in dims]
-        values += [values[0]]  # close the radar
+
+    for system, scores in systems.items():
+        s = style[system]
+        # Close the polygon by repeating the first value
+        r      = scores + [scores[0]]
+        theta  = dims  + [dims[0]]
+
         fig_radar.add_trace(go.Scatterpolar(
-            r=values,
-            theta=dims + [dims[0]],
+            r=r,
+            theta=theta,
             name=system,
-            line=dict(color=colors[i], width=widths[i]),
-            opacity=0.8 if system == "QUANT-DB" else 0.45,
-            fill="toself" if system == "QUANT-DB" else "none",
-            fillcolor="rgba(38, 166, 65, 0.12)" if system == "QUANT-DB" else None,
+            mode="lines",
+            line=dict(
+                color=s["color"],
+                width=s["width"],
+                dash=s["dash"],
+            ),
+            opacity=s["opacity"],
+            fill="toself"      if s["fill"] else "none",
+            fillcolor="rgba(38, 166, 65, 0.13)" if s["fill"] else None,
+            hovertemplate=(
+                f"<b>{system}</b><br>"
+                + "<br>".join(
+                    f"{d}: {v:.1f}" for d, v in zip(dims, scores)
+                )
+                + "<extra></extra>"
+            ),
         ))
 
     fig_radar.update_layout(
         polar=dict(
-            bgcolor="#0d1117",
-            radialaxis=dict(visible=True, range=[0, 1], color="#555"),
-            angularaxis=dict(color="#8b949e"),
+            bgcolor="#111820",
+            radialaxis=dict(
+                visible=True,
+                range=[0, 1],
+                tickvals=[0.25, 0.5, 0.75, 1.0],
+                ticktext=["0.25", "0.50", "0.75", "1.00"],
+                tickfont=dict(size=9, color="#555"),
+                gridcolor="#2a3a4a",
+                linecolor="#2a3a4a",
+                angle=45,
+            ),
+            angularaxis=dict(
+                tickfont=dict(size=12, color="#c9d1d9"),
+                linecolor="#2a3a4a",
+                gridcolor="#2a3a4a",
+                rotation=90,
+                direction="clockwise",
+            ),
         ),
-        paper_bgcolor="#0d1117", font_color="#c9d1d9",
-        showlegend=True, height=450,
-        legend=dict(bgcolor="#1a1a2e", font_size=10),
-        margin=dict(t=20, b=20),
-    )
-    st.plotly_chart(fig_radar, use_container_width=True)
-    st.caption(
-        "QUANT-DB (green, filled) is the only system reaching the outer boundary on all four axes. "
-        "All other systems are constrained to at most two dimensions simultaneously. "
-        "Radar values are qualitative (0 = absent, 1 = fully implemented)."
+        paper_bgcolor="#0d1117",
+        font_color="#c9d1d9",
+        showlegend=True,
+        height=520,
+        legend=dict(
+            bgcolor="#1a1a2e",
+            bordercolor="#30363d",
+            borderwidth=1,
+            font=dict(size=11),
+            itemsizing="constant",
+            x=1.05,
+            y=0.5,
+        ),
+        margin=dict(t=30, b=30, l=60, r=160),
+        title=dict(
+            text="Capability Coverage — QUANT-DB vs Existing Systems",
+            font=dict(size=14, color="#c9d1d9"),
+            x=0.5,
+            xanchor="center",
+        ),
     )
 
+    st.plotly_chart(fig_radar, use_container_width=True)
+
+    st.caption(
+        "Scores are qualitative (0 = absent, 1 = fully implemented). "
+        "Partial credit (0.1–0.3) is given where a system has a rudimentary or "
+        "heuristic version of the capability — e.g. Milvus has a fixed-ratio "
+        "heuristic (0.3) rather than a formal cost model (1.0). "
+        "QUANT-DB (solid green, filled) is the only system reaching all four outer vertices."
+    )
+
+    # ── Dimension score table ──────────────────────────────────────────────────
+    st.markdown("#### Score breakdown by dimension")
+    score_rows = []
+    for system, scores in systems.items():
+        score_rows.append({
+            "System":                  system,
+            "SQL interface":           scores[0],
+            "Domain compression":      scores[1],
+            "Hybrid cost model":       scores[2],
+            "Hardware-aware kernel":   scores[3],
+            "Total (max 4.0)":         round(sum(scores), 1),
+        })
+
+    score_df = pd.DataFrame(score_rows).set_index("System")
+
+    # Colour the Total column for quick scanning
+    def _colour_total(val):
+        if val == 4.0:
+            return "background-color: #1a3a1a; color: #26a641; font-weight: 700"
+        elif val >= 1.0:
+            return "background-color: #1a2a3a; color: #4a90d9"
+        else:
+            return "color: #555"
+
+    styled_df = score_df.style.applymap(
+        _colour_total, subset=["Total (max 4.0)"]
+    ).format("{:.1f}")
+
+    st.dataframe(styled_df, use_container_width=True)
+
+    # ── Dimension explanations ─────────────────────────────────────────────────
+    st.markdown("#### What each dimension means")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px;
+            padding:14px 18px; margin-bottom:12px;">
+    <div style="color:#7ec8e3; font-weight:700; font-size:12px;
+                margin-bottom:6px;">① SQL INTERFACE</div>
+    <div style="color:#a8b8cc; font-size:13px; line-height:1.7;">
+        Can a practitioner write a standard SQL query combining shape search
+        with relational predicates (WHERE, JOIN, GROUP BY) using familiar tooling?
+        <br><br>
+        <strong style="color:#e8f0fe;">1.0</strong> — Full SQL, no new syntax (QUANT-DB, pgvector)<br>
+        <strong style="color:#e8f0fe;">0.0</strong> — Proprietary API only (Pinecone, Weaviate, DTW)
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px;
+            padding:14px 18px; margin-bottom:12px;">
+    <div style="color:#7ec8e3; font-weight:700; font-size:12px;
+                margin-bottom:6px;">② DOMAIN COMPRESSION</div>
+    <div style="color:#a8b8cc; font-size:13px; line-height:1.7;">
+        Does the system apply domain-specific compression that simultaneously
+        reduces storage and enables faster distance computation?
+        <br><br>
+        <strong style="color:#e8f0fe;">1.0</strong> — VQ-VAE: 1,200 B → 8 B, L1-resident distance table (QUANT-DB)<br>
+        <strong style="color:#e8f0fe;">0.1</strong> — Manual z-score normalisation only (Pandas + Python)<br>
+        <strong style="color:#e8f0fe;">0.0</strong> — Raw float storage, generic cosine/L2 (all others)
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px;
+            padding:14px 18px; margin-bottom:12px;">
+    <div style="color:#7ec8e3; font-weight:700; font-size:12px;
+                margin-bottom:6px;">③ HYBRID COST MODEL</div>
+    <div style="color:#a8b8cc; font-size:13px; line-height:1.7;">
+        Does the system jointly estimate cardinalities for both vector and
+        relational predicates and select the minimum-cost execution plan?
+        <br><br>
+        <strong style="color:#e8f0fe;">1.0</strong> — Geometric KDE + 4 plan types (QUANT-DB)<br>
+        <strong style="color:#e8f0fe;">0.3</strong> — Fixed-ratio heuristic, 2 plan types (Milvus)<br>
+        <strong style="color:#e8f0fe;">0.1</strong> — Pre-filter threshold only (Weaviate)<br>
+        <strong style="color:#e8f0fe;">0.0</strong> — Vector-first always, or no filtering (all others)
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px;
+            padding:14px 18px; margin-bottom:12px;">
+    <div style="color:#7ec8e3; font-weight:700; font-size:12px;
+                margin-bottom:6px;">④ HARDWARE-AWARE KERNEL</div>
+    <div style="color:#a8b8cc; font-size:13px; line-height:1.7;">
+        Does the inner-loop distance computation exploit L1 cache residency
+        or SIMD intrinsics to achieve cycle-level efficiency?
+        <br><br>
+        <strong style="color:#e8f0fe;">1.0</strong> — 1,024 B L1-resident distance table, confirmed cache-resident (QUANT-DB)<br>
+        <strong style="color:#e8f0fe;">0.3</strong> — DiskANN uses AVX for raw L2, but no codebook table (Filtered-DiskANN)<br>
+        <strong style="color:#e8f0fe;">0.2</strong> — SIMD in some index paths, no table structure (Milvus)<br>
+        <strong style="color:#e8f0fe;">0.0</strong> — Generic float L2 with no cache-aware structure (all others)
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ── Summary callout ────────────────────────────────────────────────────────
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#1a2a1a,#0d1a0d);
+            border:1.5px solid #26a641; border-radius:10px;
+            padding:18px 22px; margin-top:8px;">
+    <div style="color:#90e0b0; font-weight:700; font-size:12px;
+                letter-spacing:2px; margin-bottom:10px;">CONCLUSION</div>
+    <div style="color:#c8d8c8; font-size:13px; line-height:1.9;">
+        Every other system scores at most <strong style="color:#e8f0fe;">1.0 / 4.0</strong>
+        on this matrix (pgvector: SQL yes, everything else no).
+        Milvus is closest with <strong style="color:#e8f0fe;">0.5 / 4.0</strong>
+        — partial credit on two dimensions.
+        QUANT-DB scores <strong style="color:#26a641; font-size:15px;">4.0 / 4.0</strong>
+        — the only system at the intersection of all four capabilities.<br><br>
+        This four-way intersection is not an incidental feature combination.
+        It is the <em>thesis</em>: that domain-adapted compression, cost-based hybrid
+        optimisation, hardware-aware execution, and SQL expressiveness must be
+        co-designed in a single engine to achieve sub-millisecond financial pattern
+        search at 50M-window scale.
+    </div>
+</div>
+""", unsafe_allow_html=True)
     # ── Publication positioning ────────────────────────────────────────────────
     st.divider()
     st.subheader("📝 How Each Gap Maps to a Publication")
