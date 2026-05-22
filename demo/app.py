@@ -2113,7 +2113,7 @@ elif nav == "🎓 Research Contributions":
  
     st.divider()
 
-    # ── Benchmark results — loaded from real output files ────────────────────
+     # ── Benchmark results — loaded from real output files ────────────────────
     st.subheader("📊 Benchmark Results")
 
     BENCH_CSV    = "logs/bench_results.csv"
@@ -2306,14 +2306,8 @@ elif nav == "🎓 Research Contributions":
 
     if run_l3:
         try:
-            with st.spinner("Running Layer 3 benchmark via API…"):
-                resp = requests.get(
-                    f"{API}/layer3/benchmark",
-                    params={"n_queries": n_l3_queries},
-                    timeout=60,
-                )
-            if resp.status_code == 200:
-                l3 = resp.json()
+            with st.spinner("Running Layer 3 benchmark…"):
+                l3 = _direct_benchmark(n_queries=n_l3_queries)
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("BitScan p50",     f"{l3['layer3_p50']:.3f} ms")
                 c2.metric("Brute-force p50", f"{l3['brute_force_p50']:.3f} ms")
@@ -2348,10 +2342,8 @@ elif nav == "🎓 Research Contributions":
                     f"({'fits in L1 cache' if l3['table_fits_l1'] else 'exceeds L1'}). "
                     f"This result validates the core claim of Section 3.5.2."
                 )
-            else:
-                st.error(f"API error {resp.status_code}: {resp.text}")
         except Exception as e:
-            st.error(f"API unavailable: {e}")
+            st.error(f"Benchmark error: {e}")
 
     st.divider()
 
