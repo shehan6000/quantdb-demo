@@ -1,13 +1,11 @@
 name: Keep Streamlit Alive
-
 on:
   schedule:
     - cron: '*/20 * * * *'
   workflow_dispatch:
-
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Streamlit app
-        run: curl -s -o /dev/null -w "%{http_code}" https://quantdb-demo-lbbhtnzx7h7r3b32brsa2k.streamlit.app/
+        run: curl -s -o /dev/null -w "%{http_code}" https://ingenious-vision-production-9f09.up.railway.app/
