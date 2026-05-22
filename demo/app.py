@@ -1991,69 +1991,126 @@ elif nav == "🩺 System Health":
 
 elif nav == "🎓 Research Contributions":
     st.title("Research Contributions")
+ 
+    # ── Scope banner ──────────────────────────────────────────────────────────
     st.markdown("""
     <div style="background:linear-gradient(135deg,#1a1a2a,#0d0d1a);
-                border:1.5px solid #4a90d9; border-radius:10px; padding:16px 20px; margin-bottom:16px;">
+                border:1.5px solid #4a90d9; border-radius:10px;
+                padding:16px 20px; margin-bottom:20px;">
         <div style="color:#7ec8e3; font-weight:700; font-size:12px; letter-spacing:2px;">
-            PROTOTYPE SCOPE
+            PROTOTYPE SCOPE — PRE-PHD BASELINE
         </div>
-        <div style="color:#c8d8e8; font-size:13px; line-height:1.8; margin-top:8px;">
-            <strong>Implemented and measured in this prototype:</strong><br>
-            ✅ Layer 1 — VQ-VAE compression (K=256, d=64, &lt;4% reconstruction error)<br>
-            ✅ Layer 2 — HQO with four execution plan types and geometric cardinality estimation<br>
-            ✅ Layer 3 — DistanceTable (1 KB, L1-resident) · BitScanKernel · FusedScanKernel (NumPy/SIMD)<br>
-            ✅ DuckDB PATTERN_LIKE — registered as a scalar UDF; SQL predicate executes natively<br>
-            ✅ Benchmarks: 1.000 recall@20 · 0.20 ms p50 · 14.67× speedup over brute-force<br><br>
-            <strong>Planned PhD research contributions:</strong><br>
-            🔬 Layer 3 C++ implementation with hand-written AVX-512 intrinsics (Section 3.5.3)<br>
-            🔬 DuckDB C++ extension — VectorScan / FusedScan as native table functions (Section 3.9)<br>
-            🔬 K=1024 codebook ablation · learned cardinality estimator · QUANT-BENCH at 50M windows
+        <div style="color:#c8d8e8; font-size:13px; line-height:1.9; margin-top:8px;">
+            <strong>Implemented and measured in this prototype (external dependencies):</strong><br>
+            ✅ VQ-VAE compression — K=256, d=64, &lt;4% reconstruction error (PyTorch)<br>
+            ✅ FAISS HNSW index — ANN search, L1-resident distance table, BitScanKernel (NumPy/SIMD)<br>
+            ✅ Hybrid Query Optimizer — 4 execution plan types, geometric KDE cardinality estimation<br>
+            ✅ DuckDB PATTERN_LIKE — registered scalar UDF, SQL predicate executes natively<br>
+            ✅ Benchmarks — Recall@20 = 1.000 · p50 = 0.20 ms · 14.67× speedup over brute-force<br>
+            <br>
+            <strong>PhD research target — unified native library (quantdb), zero external runtime deps:</strong><br>
+            🔬 Year 1 — C++ AVX-512 BitScanKernel · own HNSW graph design ·
+                        image-based PATTERN_SEARCH · freehand curve query input<br>
+            🔬 Year 2 — Own HNSW + own columnar store (replace FAISS + DuckDB) ·
+                        50M-window scale · QUANT-BENCH public benchmark suite<br>
+            🔬 Year 3 — Own C++ inference engine (replace PyTorch at runtime) ·
+                        unified quantdb.so · pip + CRAN packages<br>
+            🔬 Year 4 — Zero external runtime deps · formal architecture proofs ·
+                        Apache 2.0 open-source release
         </div>
     </div>
     """, unsafe_allow_html=True)
+ 
     st.markdown(
-        "The three contributions below correspond to the three proposed papers. "
-        "Measured results are shown where available; planned work is explicitly indicated."
+        "The five contributions below correspond to the three proposed papers plus two "
+        "architectural goals that span the full PhD programme. Measured results are shown "
+        "where available; planned work is explicitly indicated."
     )
-
+ 
     # ── Contribution cards ────────────────────────────────────────────────────
     st.markdown("""
-    <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:8px;">
-      <div style="flex:1; min-width:220px; background:linear-gradient(135deg,#1a2a4a,#0d1b2a);
-                  border:1.5px solid #4a90d9; border-radius:12px; padding:20px;">
-        <div style="font-size:28px; margin-bottom:8px;">💬</div>
-        <div style="color:#7ec8e3; font-weight:700; font-size:12px; letter-spacing:2px;">CONTRIBUTION 1</div>
-        <div style="color:#e8f0fe; font-weight:700; font-size:16px; margin:6px 0;">PATTERN-SQL Language</div>
-        <div style="color:#a8b8cc; font-size:13px; line-height:1.6;">
+    <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
+ 
+      <div style="flex:1; min-width:210px;
+                  background:linear-gradient(135deg,#1a2a4a,#0d1b2a);
+                  border:1.5px solid #4a90d9; border-radius:12px; padding:18px;">
+        <div style="font-size:26px; margin-bottom:6px;">💬</div>
+        <div style="color:#7ec8e3; font-weight:700; font-size:11px; letter-spacing:2px;">
+            CONTRIBUTION 1</div>
+        <div style="color:#e8f0fe; font-weight:700; font-size:15px; margin:5px 0;">
+            PATTERN-SQL Language</div>
+        <div style="color:#a8b8cc; font-size:12px; line-height:1.6;">
           A SQL extension that expresses vector similarity search as a first-class predicate —
           <code>PATTERN_LIKE()</code> — keeping the full power of relational algebra intact.
-          No new query language required.
+          No new query language required. Maps directly to Paper 1.
         </div>
       </div>
-      <div style="flex:1; min-width:220px; background:linear-gradient(135deg,#2a1a1a,#1a0d0d);
-                  border:1.5px solid #e05a3a; border-radius:12px; padding:20px;">
-        <div style="font-size:28px; margin-bottom:8px;">🧠</div>
-        <div style="color:#f0a090; font-weight:700; font-size:12px; letter-spacing:2px;">CONTRIBUTION 2</div>
-        <div style="color:#e8f0fe; font-weight:700; font-size:16px; margin:6px 0;">Domain-Adapted VQ-VAE</div>
-        <div style="color:#a8b8cc; font-size:13px; line-height:1.6;">
+ 
+      <div style="flex:1; min-width:210px;
+                  background:linear-gradient(135deg,#2a1a1a,#1a0d0d);
+                  border:1.5px solid #e05a3a; border-radius:12px; padding:18px;">
+        <div style="font-size:26px; margin-bottom:6px;">🧠</div>
+        <div style="color:#f0a090; font-weight:700; font-size:11px; letter-spacing:2px;">
+            CONTRIBUTION 2</div>
+        <div style="color:#e8f0fe; font-weight:700; font-size:15px; margin:5px 0;">
+            Domain-Adapted VQ-VAE</div>
+        <div style="color:#a8b8cc; font-size:12px; line-height:1.6;">
           A 1-D convolutional VQ-VAE with EMA codebook updates and dead-code restart,
-          specifically tuned for z-score normalised OHLCV windows.
-          Achieves 37× compression with &lt;4% reconstruction error.
+          trained on z-score normalised OHLCV windows. Achieves 37× compression with
+          &lt;4% reconstruction error. Maps to Paper 1 + Paper 2.
         </div>
       </div>
-      <div style="flex:1; min-width:220px; background:linear-gradient(135deg,#1a2a1a,#0d1a0d);
-                  border:1.5px solid #3ab86a; border-radius:12px; padding:20px;">
-        <div style="font-size:28px; margin-bottom:8px;">⚙️</div>
-        <div style="color:#90e0b0; font-weight:700; font-size:12px; letter-spacing:2px;">CONTRIBUTION 3</div>
-        <div style="color:#e8f0fe; font-weight:700; font-size:16px; margin:6px 0;">Hybrid Query Optimizer</div>
-        <div style="color:#a8b8cc; font-size:13px; line-height:1.6;">
-          A cost-based planner that jointly optimises vector ANN search and relational filtering
-          using geometric cardinality estimation — the first such planner for financial time-series.
+ 
+      <div style="flex:1; min-width:210px;
+                  background:linear-gradient(135deg,#1a2a1a,#0d1a0d);
+                  border:1.5px solid #3ab86a; border-radius:12px; padding:18px;">
+        <div style="font-size:26px; margin-bottom:6px;">⚙️</div>
+        <div style="color:#90e0b0; font-weight:700; font-size:11px; letter-spacing:2px;">
+            CONTRIBUTION 3</div>
+        <div style="color:#e8f0fe; font-weight:700; font-size:15px; margin:5px 0;">
+            Hybrid Query Optimizer</div>
+        <div style="color:#a8b8cc; font-size:12px; line-height:1.6;">
+          A cost-based planner that jointly optimises vector ANN search and relational
+          filtering using geometric cardinality estimation — the first such planner
+          for financial time-series. Maps to Paper 2.
         </div>
       </div>
+ 
+      <div style="flex:1; min-width:210px;
+                  background:linear-gradient(135deg,#1a2a2a,#0d1a1a);
+                  border:1.5px solid #20c0c0; border-radius:12px; padding:18px;">
+        <div style="font-size:26px; margin-bottom:6px;">🖼️</div>
+        <div style="color:#70e0e0; font-weight:700; font-size:11px; letter-spacing:2px;">
+            CONTRIBUTION 4</div>
+        <div style="color:#e8f0fe; font-weight:700; font-size:15px; margin:5px 0;">
+            Image &amp; Freehand Pattern Search</div>
+        <div style="color:#a8b8cc; font-size:12px; line-height:1.6;">
+          <code>PATTERN_SEARCH(chart_image)</code> — query by uploading a chart screenshot
+          or drawing a freehand curve. A lightweight CNN encoder maps the input to the same
+          64-dim latent space as the VQ-VAE, enabling cross-modal search.
+          Maps to Paper 3.
+        </div>
+      </div>
+ 
+      <div style="flex:1; min-width:210px;
+                  background:linear-gradient(135deg,#1a1a2a,#0d0d1a);
+                  border:1.5px solid #8060d0; border-radius:12px; padding:18px;">
+        <div style="font-size:26px; margin-bottom:6px;">🏗️</div>
+        <div style="color:#c0a0f0; font-weight:700; font-size:11px; letter-spacing:2px;">
+            CONTRIBUTION 5</div>
+        <div style="color:#e8f0fe; font-weight:700; font-size:15px; margin:5px 0;">
+            Unified Native Library (quantdb)</div>
+        <div style="color:#a8b8cc; font-size:12px; line-height:1.6;">
+          A single C++ library (quantdb.so) that owns every layer — encoder, index,
+          storage, optimizer, SQL parser — with zero external runtime dependencies.
+          PyTorch-style Python API via pybind11. Apache 2.0 open-source release.
+          Spans all four PhD years.
+        </div>
+      </div>
+ 
     </div>
     """, unsafe_allow_html=True)
-
+ 
     st.divider()
 
     # ── Benchmark results — loaded from real output files ────────────────────
@@ -2249,8 +2306,14 @@ elif nav == "🎓 Research Contributions":
 
     if run_l3:
         try:
-            with st.spinner("Running Layer 3 benchmark…"):
-                l3 = _direct_benchmark(n_queries=n_l3_queries)
+            with st.spinner("Running Layer 3 benchmark via API…"):
+                resp = requests.get(
+                    f"{API}/layer3/benchmark",
+                    params={"n_queries": n_l3_queries},
+                    timeout=60,
+                )
+            if resp.status_code == 200:
+                l3 = resp.json()
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("BitScan p50",     f"{l3['layer3_p50']:.3f} ms")
                 c2.metric("Brute-force p50", f"{l3['brute_force_p50']:.3f} ms")
@@ -2285,79 +2348,86 @@ elif nav == "🎓 Research Contributions":
                     f"({'fits in L1 cache' if l3['table_fits_l1'] else 'exceeds L1'}). "
                     f"This result validates the core claim of Section 3.5.2."
                 )
+            else:
+                st.error(f"API error {resp.status_code}: {resp.text}")
         except Exception as e:
-            st.error(f"Benchmark error: {e}")
+            st.error(f"API unavailable: {e}")
 
     st.divider()
 
-    # ── One-sentence thesis statement ─────────────────────────────────────────
+    # ── Thesis statement ──────────────────────────────────────────────────────
+    st.divider()
     st.subheader("Thesis Contribution Statement")
     st.markdown("""
-    <div style="
-        background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
-        border-left: 5px solid #4a90d9;
-        border-radius: 10px;
-        padding: 24px 28px;
-        margin-top: 8px;
-    ">
+    <div style="background:linear-gradient(135deg,#1a2a3a,#0d1b2a);
+                border-left:5px solid #4a90d9; border-radius:10px;
+                padding:24px 28px; margin-top:8px;">
         <div style="color:#7ec8e3; font-size:11px; font-weight:700;
                     letter-spacing:2px; margin-bottom:10px;">PROPOSED ABSTRACT</div>
         <div style="color:#e8f0fe; font-size:15px; line-height:1.8; font-style:italic;">
-            "We present QUANT-DB — a query engine that extends SQL with semantic shape predicates
-            over financial time-series, achieving sub-5ms pattern retrieval across 100K+ windows
-            with &gt;0.95 recall@20 via a domain-adapted Vector Quantised Variational Autoencoder
-            and a cost-based hybrid execution planner that jointly optimises vector ANN search
-            and relational filtering."
+            "We present quantdb — a unified, dependency-free C++ and Python library for
+            semantic financial time-series search that extends SQL with shape predicates
+            (PATTERN_LIKE, PATTERN_SEARCH) accepting numeric windows, freehand curves,
+            or chart images as query inputs. quantdb achieves sub-5ms pattern retrieval
+            across 50M+ windows at Recall@20 ≥ 0.95 via a domain-adapted VQ-VAE encoder,
+            a natively implemented HNSW index, a hardware-aware L1-resident scan kernel,
+            and a cost-based hybrid query optimizer — all integrated into a single compiled
+            artifact with zero external runtime dependencies and released as an Apache 2.0
+            open-source library."
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown(" ")
-
+ 
     st.markdown("""
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:14px;">
       <div style="background:#1a2a1a; border:1px solid #3ab86a; border-radius:8px;
                   padding:12px 18px; flex:1; min-width:180px;">
         <div style="color:#90e0b0; font-weight:700; font-size:12px;">Novel Contributions</div>
-        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.6;">
-          PATTERN-SQL syntax · VQ-VAE for OHLCV · cost-based HQO for mixed queries
+        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.7;">
+          PATTERN-SQL + image/freehand query · domain-adapted VQ-VAE ·
+          cost-based HQO · unified native library (no external deps)
         </div>
       </div>
       <div style="background:#2a1a1a; border:1px solid #e05a3a; border-radius:8px;
                   padding:12px 18px; flex:1; min-width:180px;">
         <div style="color:#f0a090; font-weight:700; font-size:12px;">Current Limitations</div>
-        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.6;">
-          Synthetic data · no DTW baseline recall yet · K=256 ablation pending
+        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.7;">
+          External deps (FAISS, DuckDB, PyTorch) · synthetic data only ·
+          image search not yet implemented · unified library in early design
         </div>
       </div>
-      <div style="background:#1a1a2a; border:1px solid #4a90d9; border-radius:8px;
+      <div style="background:#1a1a2a; border:1px solid #20c0c0; border-radius:8px;
                   padding:12px 18px; flex:1; min-width:180px;">
-        <div style="color:#7ec8e3; font-weight:700; font-size:12px;">Planned Validation</div>
-        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.6;">
-          Real yfinance validation · codebook size ablation · learned cardinality estimator
+        <div style="color:#70e0e0; font-weight:700; font-size:12px;">Final Deliverable</div>
+        <div style="color:#a8b8cc; font-size:12px; margin-top:6px; line-height:1.7;">
+          Apache 2.0 open-source library — NOT a commercial product ·
+          pip + CRAN + header-only C++ · QUANT-BENCH as community benchmark standard
         </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # PAGE: ROADMAP TO PRODUCTION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+ 
 elif nav == "🗺️ Roadmap to Production":
-    st.title("QUANT-DB — Development Roadmap")
+    st.title("quantdb — Development Roadmap")
     st.markdown(
-        "This page maps the complete development arc from the current working prototype "
-        "through four years of PhD research to a commercially deployable product. "
-        "Each stage defines concrete technical deliverables, measurable success criteria, and publication targets."
+        "This page maps the complete development arc: from the current working prototype "
+        "that depends on FAISS, DuckDB, and PyTorch, through four years of PhD research "
+        "that systematically replaces each external dependency with a native implementation, "
+        "to a final unified open-source library with zero external runtime dependencies — "
+        "released as Apache 2.0 for the research community."
     )
-
-    # ── TRL Progress Bar ──────────────────────────────────────────────────────
+ 
+    # ── TRL bar ───────────────────────────────────────────────────────────────
     st.markdown("""
     <div style="background:#0d1117; border:1px solid #30363d; border-radius:10px;
                 padding:20px 24px; margin:16px 0;">
-        <div style="color:#8b949e; font-size:11px; font-weight:700; letter-spacing:2px;
-                    margin-bottom:14px;">TECHNOLOGY READINESS LEVEL</div>
+        <div style="color:#8b949e; font-size:11px; font-weight:700;
+                    letter-spacing:2px; margin-bottom:14px;">
+            TECHNOLOGY READINESS LEVEL</div>
         <div style="display:flex; align-items:center; gap:0; width:100%;">
             <div style="flex:1; text-align:center;">
                 <div style="background:#26a641; border-radius:6px 0 0 6px;
@@ -2368,7 +2438,7 @@ elif nav == "🗺️ Roadmap to Production":
             <div style="flex:1; text-align:center;">
                 <div style="background:#26a641; padding:10px 4px;
                             font-size:11px; font-weight:700; color:white; border-left:1px solid #0d1117;">
-                    TRL 4<br><span style="font-weight:400;font-size:10px;">Lab Prototype ✅</span>
+                    TRL 4<br><span style="font-weight:400;font-size:10px;">Prototype ✅</span>
                 </div>
             </div>
             <div style="flex:1; text-align:center;">
@@ -2384,27 +2454,29 @@ elif nav == "🗺️ Roadmap to Production":
                 </div>
             </div>
             <div style="flex:1; text-align:center;">
-                <div style="background:#da3633; border-radius:0 6px 6px 0;
-                            padding:10px 4px; font-size:11px; font-weight:700; color:white; border-left:1px solid #0d1117;">
-                    TRL 8–9<br><span style="font-weight:400;font-size:10px;">Commercial</span>
+                <div style="background:#20c0c0; border-radius:0 6px 6px 0;
+                            padding:10px 4px; font-size:11px; font-weight:700; color:white;
+                            border-left:1px solid #0d1117;">
+                    TRL 8<br><span style="font-weight:400;font-size:10px;">Open-Source Release</span>
                 </div>
             </div>
         </div>
         <div style="display:flex; margin-top:8px; padding:0 2px;">
             <div style="flex:2; color:#26a641; font-size:10px; text-align:center;">COMPLETE</div>
-            <div style="flex:2; color:#4a90d9; font-size:10px; text-align:center;">PhD YEARS 1–2</div>
-            <div style="flex:1; color:#8b3dbf; font-size:10px; text-align:center;">PhD YEARS 3–4</div>
-            <div style="flex:1; color:#da3633; font-size:10px; text-align:center;">POST-PHD</div>
+            <div style="flex:2; color:#4a90d9; font-size:10px; text-align:center;">PHD YEARS 1–2</div>
+            <div style="flex:1; color:#8b3dbf; font-size:10px; text-align:center;">PHD YEARS 3–4</div>
+            <div style="flex:1; color:#20c0c0; font-size:10px; text-align:center;">POST-PHD</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
     st.divider()
-
-    # ── Stage 0: Pre-PhD Prototype ────────────────────────────────────────────
+ 
+    # ── Stage 0 ───────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#0d2a0d,#0a1a0a); border:1.5px solid #26a641;
-                border-radius:12px; padding:22px 26px; margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#0d2a0d,#0a1a0a);
+                border:1.5px solid #26a641; border-radius:12px;
+                padding:22px 26px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
             <div style="background:#26a641; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
@@ -2413,19 +2485,22 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#90e0b0; font-size:11px; font-weight:700; letter-spacing:2px;">
                     STAGE 0 — COMPLETE (Pre-PhD)</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    Working Research Prototype</div>
+                    Working Research Prototype (External Dependencies)</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
             <div style="flex:1.5; min-width:220px;">
                 <div style="color:#90e0b0; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Built and Running</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    VQ-VAE encoder — K=256 codebook, d=64 latent, &lt;4% reconstruction error<br>
+                    VQ-VAE encoder — K=256 codebook, d=64 latent, &lt;4% reconstruction error
+                        (PyTorch)<br>
                     FAISS HNSW index — m=16, ef_construction=200, ef_search=64<br>
-                    Hybrid Query Optimizer — 4 execution plan types, geometric cardinality estimator<br>
-                    Layer 3 execution engine — DistanceTable (1 KB, L1-resident), BitScanKernel, FusedScanKernel<br>
-                    DuckDB PATTERN_LIKE — registered scalar UDF, SQL predicate executes natively<br>
+                    Hybrid Query Optimizer — 4 execution plan types, geometric cardinality
+                        estimator<br>
+                    Layer 3 execution engine — DistanceTable (1 KB, L1-resident),
+                        BitScanKernel (NumPy/SIMD), FusedScanKernel<br>
+                    DuckDB PATTERN_LIKE — registered scalar UDF, executes natively in SQL<br>
                     FastAPI backend + Streamlit demo — full query lifecycle visible end-to-end
                 </div>
             </div>
@@ -2440,15 +2515,21 @@ elif nav == "🗺️ Roadmap to Production":
                     Speedup vs brute-force: <strong style="color:#e8f0fe;">14.67×</strong><br>
                     Distance table: <strong style="color:#e8f0fe;">1 KB (L1-resident)</strong>
                 </div>
+                <div style="color:#90e0b0; font-size:12px; font-weight:700; margin-top:12px;">
+                    External deps at this stage</div>
+                <div style="color:#a8b8cc; font-size:12px; line-height:1.7;">
+                    FAISS · DuckDB · PyTorch · FastAPI · Streamlit
+                </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── Stage 1: PhD Year 1 ───────────────────────────────────────────────────
+ 
+    # ── Stage 1 ───────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#0d1a2a,#091422); border:1.5px solid #4a90d9;
-                border-radius:12px; padding:22px 26px; margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#0d1a2a,#091422);
+                border:1.5px solid #4a90d9; border-radius:12px;
+                padding:22px 26px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
             <div style="background:#4a90d9; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
@@ -2457,26 +2538,34 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#7ec8e3; font-size:11px; font-weight:700; letter-spacing:2px;">
                     STAGE 1 — PhD Year 1</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    Hardware-Aware Execution Engine &amp; Real Data</div>
+                    Hardware-Aware Engine, Real Data &amp; Begin Dependency Replacement</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
             <div style="flex:1.5; min-width:240px;">
                 <div style="color:#7ec8e3; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Technical Deliverables</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
                     <strong style="color:#c8d8e8;">C++ AVX-512 BitScanKernel</strong> —
-                    hand-written SIMD intrinsics replacing the NumPy dispatch path;
-                    target &lt;0.05 ms p50 at 50K windows with measured cache-line alignment<br>
-                    <strong style="color:#c8d8e8;">DuckDB C++ Extension</strong> —
-                    VectorScan and FusedScan as native DuckDB table functions (Section 3.9),
-                    eliminating all per-row Python callback overhead<br>
-                    <strong style="color:#c8d8e8;">Codebook Ablation Study</strong> —
-                    full sweep K ∈ {64, 128, 256, 512, 1024} on real financial data;
-                    theoretical bounds on codebook geometry (Proposal Section 3.3)<br>
-                    <strong style="color:#c8d8e8;">Real Financial Dataset</strong> —
-                    S&P 500 constituents via yfinance (~500 tickers × 6 years ≈ 750K windows);
-                    replace synthetic benchmark baseline entirely
+                        hand-written SIMD intrinsics replacing NumPy dispatch;
+                        target &lt;0.05 ms p50 at 750K windows<br>
+                    <strong style="color:#c8d8e8;">DuckDB C++ extension</strong> —
+                        VectorScan and FusedScan as native DuckDB table functions,
+                        eliminating per-row Python callback overhead<br>
+                    <strong style="color:#c8d8e8;">Own HNSW graph design</strong> —
+                        prototype C++ HNSW implementation to replace FAISS;
+                        API-compatible, no external linkage<br>
+                    <strong style="color:#c8d8e8;">Chart image encoder (CNN)</strong> —
+                        lightweight ResNet-lite that maps a chart screenshot to the same
+                        64-dim latent space as the VQ-VAE; first prototype of
+                        PATTERN_SEARCH(chart_image) predicate<br>
+                    <strong style="color:#c8d8e8;">Freehand curve query input</strong> —
+                        mouse/stylus drawn pattern → z-score normalised → encoded → queried<br>
+                    <strong style="color:#c8d8e8;">Real S&amp;P 500 dataset</strong> —
+                        ~500 tickers × 6 years ≈ 750K windows via yfinance;
+                        replace synthetic benchmark entirely<br>
+                    <strong style="color:#c8d8e8;">Codebook ablation</strong> —
+                        full sweep K ∈ {64, 128, 256, 512, 1024}
                 </div>
             </div>
             <div style="flex:1; min-width:180px;">
@@ -2485,25 +2574,31 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
                     p50 latency &lt;0.05 ms at 750K windows<br>
                     Recall@20 ≥ 0.97 on real yfinance data<br>
-                    DuckDB extension passes CI test suite<br>
-                    K ablation results submitted as Paper 1
+                    Image query round-trip &lt;50 ms<br>
+                    Own HNSW prototype passes unit tests<br>
+                    K ablation submitted as Paper 1
                 </div>
                 <div style="color:#7ec8e3; font-size:12px; font-weight:700;
-                            margin-top:14px; margin-bottom:6px;">Publication Target</div>
+                            margin-top:14px; margin-bottom:6px;">Deps eliminated</div>
+                <div style="color:#a8b8cc; font-size:12px;">
+                    DuckDB Python UDF overhead → C++ extension
+                </div>
+                <div style="color:#7ec8e3; font-size:12px; font-weight:700;
+                            margin-top:12px; margin-bottom:4px;">Publication Target</div>
                 <div style="color:#a8b8cc; font-size:13px;">
                     <strong style="color:#c8d8e8;">Paper 1</strong><br>
-                    DaMoN @ SIGMOD 2026<br>
-                    <em style="font-size:12px;">Data Management on New Hardware</em>
+                    DaMoN @ SIGMOD 2026
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── Stage 2: PhD Year 2 ───────────────────────────────────────────────────
+ 
+    # ── Stage 2 ───────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#1a0d2a,#110922); border:1.5px solid #8b3dbf;
-                border-radius:12px; padding:22px 26px; margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#1a0d2a,#110922);
+                border:1.5px solid #8b3dbf; border-radius:12px;
+                padding:22px 26px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
             <div style="background:#8b3dbf; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
@@ -2512,55 +2607,67 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#d4a8f0; font-size:11px; font-weight:700; letter-spacing:2px;">
                     STAGE 2 — PhD Year 2</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    Scale, Learned Optimisation &amp; Benchmark Suite</div>
+                    Replace FAISS + DuckDB — Native Index &amp; Storage</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
             <div style="flex:1.5; min-width:240px;">
                 <div style="color:#d4a8f0; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Technical Deliverables</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    <strong style="color:#c8d8e8;">Scale to 50M Windows</strong> —
-                    IVF-PQ index partitioning, disk-resident latent store with memory-mapped I/O,
-                    distributed ingestion pipeline via Apache Kafka<br>
-                    <strong style="color:#c8d8e8;">Learned Cardinality Estimator</strong> —
-                    small MLP trained on query logs replaces geometric KDE;
-                    target &lt;10% cardinality estimation error across selectivity regimes<br>
-                    <strong style="color:#c8d8e8;">QUANT-BENCH</strong> —
-                    public benchmark suite at 1M / 10M / 50M windows;
-                    standardised recall, latency, and compression metrics;
-                    baselines against DTW, UCR Suite, pgvector, and Pinecone<br>
-                    <strong style="color:#c8d8e8;">Multi-Domain Extension</strong> —
-                    ODDS_LIKE predicate for sports betting match-odds series;
-                    validates domain-agnostic architecture (Section 4.3)
+                    <strong style="color:#c8d8e8;">Own HNSW in C++ (no FAISS)</strong> —
+                        full production implementation with Python bindings via pybind11;
+                        IVF-PQ partitioning for 50M-window scale<br>
+                    <strong style="color:#c8d8e8;">Own columnar storage + SQL parser
+                        (no DuckDB)</strong> —
+                        column-oriented store with a SQL-subset parser supporting PATTERN_LIKE,
+                        PATTERN_SEARCH, WHERE, ORDER BY, LIMIT; disk-resident with
+                        memory-mapped I/O<br>
+                    <strong style="color:#c8d8e8;">Learned cardinality estimator</strong> —
+                        small MLP trained on query logs replaces geometric KDE;
+                        target &lt;10% estimation error<br>
+                    <strong style="color:#c8d8e8;">Scale to 50M windows</strong> —
+                        distributed ingestion via Apache Kafka; IVF-PQ index partitioning<br>
+                    <strong style="color:#c8d8e8;">QUANT-BENCH public release</strong> —
+                        standardised benchmark at 1M / 10M / 50M windows; baselines against
+                        DTW, pgvector, Pinecone, own prior stages<br>
+                    <strong style="color:#c8d8e8;">ODDS_LIKE predicate</strong> —
+                        extends architecture to sports-betting match-odds series;
+                        validates domain-agnostic design
                 </div>
             </div>
             <div style="flex:1; min-width:180px;">
                 <div style="color:#d4a8f0; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Success Criteria</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    p95 latency &lt;5 ms at 50M windows<br>
-                    QUANT-BENCH publicly released<br>
-                    Learned estimator &lt;10% error<br>
-                    Multi-domain recall ≥ 0.93<br>
-                    Adopted by ≥1 external group
+                    p95 &lt;5 ms at 50M windows<br>
+                    No FAISS linkage at runtime<br>
+                    No DuckDB linkage at runtime<br>
+                    Estimator error &lt;10%<br>
+                    QUANT-BENCH publicly released
                 </div>
                 <div style="color:#d4a8f0; font-size:12px; font-weight:700;
-                            margin-top:14px; margin-bottom:6px;">Publication Target</div>
+                            margin-top:14px; margin-bottom:6px;">Deps eliminated</div>
+                <div style="color:#a8b8cc; font-size:12px;">
+                    FAISS → own HNSW<br>
+                    DuckDB → own columnar store
+                </div>
+                <div style="color:#d4a8f0; font-size:12px; font-weight:700;
+                            margin-top:12px; margin-bottom:4px;">Publication Target</div>
                 <div style="color:#a8b8cc; font-size:13px;">
                     <strong style="color:#c8d8e8;">Paper 2</strong><br>
-                    VLDB 2027<br>
-                    <em style="font-size:12px;">Hybrid Query Optimisation at Scale</em>
+                    VLDB 2027
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── Stage 3: PhD Year 3 ───────────────────────────────────────────────────
+ 
+    # ── Stage 3 ───────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#2a1a0a,#1a0e05); border:1.5px solid #f0a500;
-                border-radius:12px; padding:22px 26px; margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#2a1a0a,#1a0e05);
+                border:1.5px solid #f0a500; border-radius:12px;
+                padding:22px 26px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
             <div style="background:#f0a500; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
@@ -2569,53 +2676,68 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#f0c060; font-size:11px; font-weight:700; letter-spacing:2px;">
                     STAGE 3 — PhD Year 3</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    System Integration, SDK &amp; Practitioner Validation</div>
+                    Replace PyTorch — Own Inference Engine &amp; Unified Library</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
             <div style="flex:1.5; min-width:240px;">
                 <div style="color:#f0c060; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Technical Deliverables</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    <strong style="color:#c8d8e8;">Unified QUANT-DB Engine</strong> —
-                    single compiled binary integrating all three layers;
-                    ACID-compliant ingestion with WAL-based crash recovery<br>
-                    <strong style="color:#c8d8e8;">Python &amp; R Client SDK</strong> —
-                    <code>quantdb.connect()</code> mirroring psycopg2 and DBI interfaces;
-                    pip and CRAN packaging with CI/CD pipeline<br>
-                    <strong style="color:#c8d8e8;">Adaptive Codebook Refresh</strong> —
-                    online EMA codebook update without full retraining;
-                    triggered by entropy health monitor crossing configurable threshold<br>
-                    <strong style="color:#c8d8e8;">Practitioner User Study</strong> —
-                    N=20 quant analysts; measure query expressiveness and task completion
-                    vs SQL+pgvector and raw Python DTW baselines (Section 5.2)
+                    <strong style="color:#c8d8e8;">Own C++ inference engine (no PyTorch
+                        at runtime)</strong> —
+                        VQ-VAE and CNN image encoder weights exported to GGUF/ONNX-like
+                        format; custom C++ forward-pass replaces PyTorch at query time
+                        (PyTorch kept for training only)<br>
+                    <strong style="color:#c8d8e8;">Unified single-binary library
+                        (quantdb.so / quantdb.dll)</strong> —
+                        encoder + index + storage + optimizer + SQL parser compiled into
+                        one shared library with zero external runtime dependencies<br>
+                    <strong style="color:#c8d8e8;">Python wheel (pip install quantdb)</strong>
+                        — pybind11 bindings: quantdb.connect() / quantdb.train() /
+                        quantdb.query() / quantdb.search_image()<br>
+                    <strong style="color:#c8d8e8;">R CRAN package</strong> —
+                        quantdb R bindings for academic statisticians<br>
+                    <strong style="color:#c8d8e8;">Adaptive codebook refresh</strong> —
+                        online EMA update without full retraining, triggered by entropy
+                        health monitor<br>
+                    <strong style="color:#c8d8e8;">Practitioner user study (N=20)</strong> —
+                        quant analysts; measure query expressiveness vs SQL+pgvector baseline
                 </div>
             </div>
             <div style="flex:1; min-width:180px;">
                 <div style="color:#f0c060; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Success Criteria</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    Unified engine passes full test suite<br>
+                    pip install quantdb works offline<br>
+                    No PyTorch runtime dep<br>
                     SDK test coverage ≥ 85%<br>
                     User study task completion ≥ 80%<br>
-                    Adaptive refresh &lt;2% recall degradation
+                    Image query &lt;10 ms end-to-end
                 </div>
                 <div style="color:#f0c060; font-size:12px; font-weight:700;
-                            margin-top:14px; margin-bottom:6px;">Publication Target</div>
+                            margin-top:14px; margin-bottom:6px;">Deps eliminated</div>
+                <div style="color:#a8b8cc; font-size:12px;">
+                    PyTorch (runtime) → own C++ inference<br>
+                    FastAPI → native C++ server (optional)<br>
+                    Streamlit → optional; core is library
+                </div>
+                <div style="color:#f0c060; font-size:12px; font-weight:700;
+                            margin-top:12px; margin-bottom:4px;">Publication Target</div>
                 <div style="color:#a8b8cc; font-size:13px;">
                     <strong style="color:#c8d8e8;">Paper 3</strong><br>
-                    SIGMOD 2028<br>
-                    <em style="font-size:12px;">End-to-End System + User Study</em>
+                    SIGMOD 2028
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── Stage 4: PhD Year 4 ───────────────────────────────────────────────────
+ 
+    # ── Stage 4 ───────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#1a2a0d,#0f1a08); border:1.5px solid #3ab86a;
-                border-radius:12px; padding:22px 26px; margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#1a2a1a,#0f1a08);
+                border:1.5px solid #3ab86a; border-radius:12px;
+                padding:22px 26px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
             <div style="background:#3ab86a; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
@@ -2624,145 +2746,288 @@ elif nav == "🗺️ Roadmap to Production":
                 <div style="color:#90e0b0; font-size:11px; font-weight:700; letter-spacing:2px;">
                     STAGE 4 — PhD Year 4</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    Comprehensive Evaluation, Hardening &amp; Thesis</div>
+                    Comprehensive Evaluation, Formal Proofs &amp; Thesis</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
             <div style="flex:1.5; min-width:240px;">
                 <div style="color:#90e0b0; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Technical Deliverables</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    <strong style="color:#c8d8e8;">QUANT-BENCH Full Sweep</strong> —
-                    comprehensive evaluation across all design dimensions at 50M+ windows;
-                    formal comparison against Pinecone, Weaviate, pgvector, and QuestDB<br>
-                    <strong style="color:#c8d8e8;">Theoretical Analysis</strong> —
-                    unified codebook geometry bounds linking compression rate,
-                    ANN recall, and query latency; formal proof of HQO cost model optimality<br>
-                    <strong style="color:#c8d8e8;">SIGMOD Demo Track Submission</strong> —
-                    interactive system demonstration with live benchmark harness<br>
+                    <strong style="color:#c8d8e8;">QUANT-BENCH full sweep</strong> —
+                        comprehensive evaluation at 1M / 10M / 50M windows;
+                        formal comparison against TimescaleDB, QuestDB, pgvector, Pinecone,
+                        and the own Stage 0 prototype with external deps<br>
+                    <strong style="color:#c8d8e8;">Theoretical analysis</strong> —
+                        unified codebook geometry bounds linking compression rate, ANN recall,
+                        and query latency; formal proof of HQO cost model optimality<br>
+                    <strong style="color:#c8d8e8;">SIGMOD Demo Track submission</strong> —
+                        interactive demonstration of the unified quantdb library with live
+                        benchmark harness<br>
                     <strong style="color:#c8d8e8;">Thesis</strong> —
-                    three-paper thesis integrating all contributions;
-                    written, submitted, and defended
+                        three-paper thesis: PATTERN-SQL (Paper 1),
+                        HQO at scale (Paper 2), end-to-end system + user study (Paper 3);
+                        written, submitted, and defended
                 </div>
             </div>
             <div style="flex:1; min-width:180px;">
                 <div style="color:#90e0b0; font-size:12px; font-weight:700; margin-bottom:8px;">
                     Success Criteria</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    All 3 papers accepted at target venues<br>
+                    All 3 papers accepted<br>
                     QUANT-BENCH adopted externally<br>
-                    Demo accepted at SIGMOD 2029<br>
-                    Thesis submitted and defended
+                    SIGMOD demo accepted<br>
+                    Thesis submitted and defended<br>
+                    Zero external runtime deps confirmed
                 </div>
                 <div style="color:#90e0b0; font-size:12px; font-weight:700;
-                            margin-top:14px; margin-bottom:6px;">Publication Target</div>
+                            margin-top:14px; margin-bottom:4px;">Publication Target</div>
                 <div style="color:#a8b8cc; font-size:13px;">
                     <strong style="color:#c8d8e8;">SIGMOD 2029 Demo Track</strong><br>
-                    PVLDB Vol. 22 (journal extension)<br>
-                    <em style="font-size:12px;">Full system paper</em>
+                    PVLDB Vol. 22 (journal extension)
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── Stage 5: Commercial ───────────────────────────────────────────────────
+ 
+    # ── Stage 5 — open-source release ─────────────────────────────────────────
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#2a0d0d,#1a0808); border:1.5px solid #da3633;
-                border-radius:12px; padding:22px 26px; margin-bottom:24px;">
+    <div style="background:linear-gradient(135deg,#0d2a2a,#081a1a);
+                border:1.5px solid #20c0c0; border-radius:12px;
+                padding:22px 26px; margin-bottom:24px;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
-            <div style="background:#da3633; border-radius:50%; width:36px; height:36px;
+            <div style="background:#20c0c0; border-radius:50%; width:36px; height:36px;
                         display:flex; align-items:center; justify-content:center;
                         font-weight:800; font-size:16px; color:white; flex-shrink:0;">→</div>
             <div>
-                <div style="color:#f09090; font-size:11px; font-weight:700; letter-spacing:2px;">
-                    STAGE 5 — Post-PhD (Year 5+)</div>
+                <div style="color:#70e0e0; font-size:11px; font-weight:700; letter-spacing:2px;">
+                    STAGE 5 — Post-PhD</div>
                 <div style="color:#e8f0fe; font-size:18px; font-weight:700; margin-top:2px;">
-                    Commercial Deployment</div>
+                    quantdb — Apache 2.0 Open-Source Library Release</div>
             </div>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:200px;">
-                <div style="color:#f09090; font-size:12px; font-weight:700; margin-bottom:8px;">
-                    Product Tiers</div>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:210px;">
+                <div style="color:#70e0e0; font-size:12px; font-weight:700; margin-bottom:8px;">
+                    What is Released</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    <strong style="color:#c8d8e8;">QUANT-DB Cloud</strong> —
-                    fully managed SaaS; REST + WebSocket API; per-query pricing<br>
-                    <strong style="color:#c8d8e8;">QUANT-DB Enterprise</strong> —
-                    on-premise via Docker/Kubernetes; SSO, audit logging, RBAC<br>
-                    <strong style="color:#c8d8e8;">QUANT-DB Embedded</strong> —
-                    single-library (.so/.dll) for integration into existing quant
-                    platforms (QuantLib, Zipline, backtrader)
+                    <strong style="color:#c8d8e8;">quantdb.so / quantdb.dll</strong> —
+                        the unified C++ library, Apache 2.0 licensed<br>
+                    <strong style="color:#c8d8e8;">pip install quantdb</strong> —
+                        PyPI + Conda packages with pybind11 Python API<br>
+                    <strong style="color:#c8d8e8;">install.packages("quantdb")</strong> —
+                        CRAN package for R community<br>
+                    <strong style="color:#c8d8e8;">Header-only C++ interface</strong> —
+                        for embedding in any application without linking the full library<br>
+                    <strong style="color:#c8d8e8;">QUANT-BENCH server</strong> —
+                        maintained academic benchmark submission platform
                 </div>
             </div>
-            <div style="flex:1; min-width:200px;">
-                <div style="color:#f09090; font-size:12px; font-weight:700; margin-bottom:8px;">
-                    Target Markets</div>
+            <div style="flex:1; min-width:210px;">
+                <div style="color:#70e0e0; font-size:12px; font-weight:700; margin-bottom:8px;">
+                    Target Community</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    Quantitative hedge funds and prop trading desks<br>
-                    Systematic strategy research teams<br>
-                    Sports betting analytics platforms<br>
-                    Retail algorithmic trading platforms<br>
-                    Academic research groups (open-core free tier)
+                    Academic research groups building on quantdb<br>
+                    Quant practitioners embedding the library in their own pipelines<br>
+                    Open-source contributors extending custom encoders and predicates<br>
+                    PhD students using QUANT-BENCH as a standard benchmark
                 </div>
             </div>
-            <div style="flex:1; min-width:200px;">
-                <div style="color:#f09090; font-size:12px; font-weight:700; margin-bottom:8px;">
-                    Differentiators vs Existing Systems</div>
+            <div style="flex:1; min-width:210px;">
+                <div style="color:#70e0e0; font-size:12px; font-weight:700; margin-bottom:8px;">
+                    What This Is NOT</div>
                 <div style="color:#a8b8cc; font-size:13px; line-height:1.9;">
-                    Only database with native SQL shape search<br>
-                    Domain-adapted compression (not generic cosine similarity)<br>
-                    10–100× faster than DTW at scale<br>
-                    QUANT-BENCH as independent validation standard<br>
-                    Open-core: engine Apache-licensed, cloud tiers commercial
+                    ❌ Not a SaaS product<br>
+                    ❌ Not a managed cloud service<br>
+                    ❌ Not a startup or commercial offering<br>
+                    ❌ Not a wrapper around existing libraries<br><br>
+                    <strong style="color:#e8f0fe;">
+                        The contribution is the architecture itself —
+                        a compact, dependency-free, domain-aware database engine
+                        built from scratch that the research community can build on.
+                    </strong>
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
     st.divider()
-
-    # ── Gantt Chart (4-year PhD + commercial) ────────────────────────────────
+ 
+    # ── Dependency elimination roadmap ─────────────────────────────────────────
+    st.subheader("Dependency Elimination Roadmap")
+    st.caption(
+        "The central architectural goal: systematically replace every external component "
+        "with a native implementation, producing a single unified library — "
+        "like PyTorch, which ships its own BLAS, custom CUDA kernels, and autograd "
+        "without requiring external ML frameworks."
+    )
+    dep_data = {
+        "Component": [
+            "ANN vector index",
+            "Columnar storage + SQL",
+            "Neural net inference",
+            "Neural net training",
+            "Query optimizer",
+            "Python bindings",
+        ],
+        "Stage 0 (now)": [
+            "FAISS (Facebook AI Research)",
+            "DuckDB (DuckDB Inc.)",
+            "PyTorch (Meta AI)",
+            "PyTorch (Meta AI)",
+            "Custom Python HQO",
+            "Streamlit / FastAPI",
+        ],
+        "Year 1": [
+            "FAISS + own HNSW prototype",
+            "DuckDB + C++ UDF extension",
+            "PyTorch (kept)",
+            "PyTorch (kept)",
+            "C++ cost model stubs",
+            "pybind11 stubs",
+        ],
+        "Year 2": [
+            "Own HNSW in C++ — no FAISS",
+            "Own columnar store — no DuckDB",
+            "PyTorch (kept for training)",
+            "PyTorch (kept)",
+            "C++ HQO + learned estimator",
+            "pybind11 full Python API",
+        ],
+        "Year 3": [
+            "Own HNSW (production)",
+            "Own storage (production)",
+            "Own C++ forward pass — no PyTorch runtime",
+            "PyTorch (training only, not shipped)",
+            "Integrated HQO (C++)",
+            "pip install quantdb",
+        ],
+        "Year 4 / Release": [
+            "Own HNSW (zero external)",
+            "Own storage (zero external)",
+            "Own inference (zero external)",
+            "PyTorch training scripts — separate, not in library",
+            "Unified HQO (zero external)",
+            "pip + CRAN + header-only C++",
+        ],
+    }
+    st.dataframe(pd.DataFrame(dep_data).set_index("Component"), use_container_width=True)
+ 
+    st.divider()
+ 
+    # ── Performance targets ────────────────────────────────────────────────────
+    st.subheader("Performance Targets by Stage")
+    perf_data = {
+        "Metric": [
+            "Dataset size",
+            "Query latency p50",
+            "Query latency p95",
+            "Recall@20",
+            "Codebook size K",
+            "Image query latency",
+            "External runtime deps",
+            "Distribution",
+        ],
+        "Stage 0 (Now)": [
+            "14K windows",
+            "0.20 ms",
+            "0.24 ms",
+            "1.000",
+            "256",
+            "Not implemented",
+            "FAISS + DuckDB + PyTorch",
+            "Streamlit demo only",
+        ],
+        "PhD Year 1": [
+            "750K windows",
+            "< 0.05 ms",
+            "< 0.10 ms",
+            "≥ 0.97",
+            "1024",
+            "< 50 ms",
+            "DuckDB UDF → C++ ext",
+            "C++ + Python stubs",
+        ],
+        "PhD Year 2": [
+            "50M windows",
+            "< 1 ms",
+            "< 5 ms",
+            "≥ 0.95",
+            "1024",
+            "< 20 ms",
+            "No FAISS, no DuckDB",
+            "pybind11 pip wheel",
+        ],
+        "PhD Year 3": [
+            "50M windows",
+            "< 1 ms",
+            "< 5 ms",
+            "≥ 0.95",
+            "Configurable",
+            "< 10 ms",
+            "No PyTorch at runtime",
+            "pip + CRAN",
+        ],
+        "Year 4 / Open-source": [
+            "50M+ windows",
+            "< 1 ms",
+            "< 5 ms",
+            "≥ 0.95",
+            "Configurable",
+            "< 10 ms",
+            "Zero external runtime",
+            "Apache 2.0 — pip + CRAN + .so",
+        ],
+    }
+    st.dataframe(pd.DataFrame(perf_data).set_index("Metric"), use_container_width=True)
+ 
+    st.divider()
+ 
+    # ── Gantt chart ───────────────────────────────────────────────────────────
     st.subheader("Development Timeline")
-    import pandas as _pd
-
+ 
     gantt_data = [
         # Stage 0
-        dict(Task="VQ-VAE + HNSW prototype",          Stage="Stage 0",   Start=0,  End=6,  S="done"),
-        dict(Task="Layer 3 BitScanKernel (NumPy)",     Stage="Stage 0",   Start=4,  End=8,  S="done"),
-        dict(Task="DuckDB PATTERN_LIKE UDF",           Stage="Stage 0",   Start=6,  End=8,  S="done"),
-        dict(Task="Benchmarks + Demo",                 Stage="Stage 0",   Start=7,  End=8,  S="done"),
+        dict(Task="VQ-VAE + HNSW prototype (PyTorch + FAISS)",  S="done",  Start=0,  End=6),
+        dict(Task="Layer 3 BitScanKernel (NumPy)",              S="done",  Start=4,  End=8),
+        dict(Task="DuckDB PATTERN_LIKE UDF",                    S="done",  Start=6,  End=8),
+        dict(Task="Benchmarks + Streamlit demo",                S="done",  Start=7,  End=8),
         # Year 1
-        dict(Task="C++ AVX-512 BitScanKernel",         Stage="PhD Year 1",Start=8,  End=14, S="y1"),
-        dict(Task="DuckDB C++ Extension",              Stage="PhD Year 1",Start=10, End=16, S="y1"),
-        dict(Task="Codebook Ablation (K sweep)",       Stage="PhD Year 1",Start=12, End=17, S="y1"),
-        dict(Task="Real S&P 500 Dataset (750K)",       Stage="PhD Year 1",Start=8,  End=13, S="y1"),
-        dict(Task="Paper 1 — DaMoN/SIGMOD 2026",       Stage="PhD Year 1",Start=15, End=20, S="paper"),
+        dict(Task="C++ AVX-512 BitScanKernel",                  S="y1",   Start=8,  End=14),
+        dict(Task="DuckDB C++ extension",                        S="y1",   Start=10, End=16),
+        dict(Task="Own HNSW graph prototype (C++)",              S="y1",   Start=12, End=18),
+        dict(Task="Chart image encoder + PATTERN_SEARCH",        S="y1",   Start=10, End=17),
+        dict(Task="Real S&P 500 dataset (750K windows)",         S="y1",   Start=8,  End=13),
+        dict(Task="Codebook ablation K sweep",                   S="y1",   Start=12, End=17),
+        dict(Task="Paper 1 — DaMoN @ SIGMOD 2026",               S="paper",Start=16, End=20),
         # Year 2
-        dict(Task="Scale to 50M windows (IVF-PQ)",    Stage="PhD Year 2",Start=20, End=28, S="y2"),
-        dict(Task="Learned Cardinality Estimator",     Stage="PhD Year 2",Start=22, End=29, S="y2"),
-        dict(Task="QUANT-BENCH Public Release",        Stage="PhD Year 2",Start=26, End=32, S="y2"),
-        dict(Task="ODDS_LIKE — Sports Betting Domain", Stage="PhD Year 2",Start=24, End=31, S="y2"),
-        dict(Task="Paper 2 — VLDB 2027",               Stage="PhD Year 2",Start=29, End=34, S="paper"),
+        dict(Task="Own HNSW C++ — replace FAISS",               S="y2",   Start=20, End=28),
+        dict(Task="Own columnar store + SQL parser — replace DuckDB", S="y2", Start=22, End=30),
+        dict(Task="Learned cardinality estimator (MLP)",         S="y2",   Start=24, End=29),
+        dict(Task="Scale to 50M windows (IVF-PQ native)",        S="y2",   Start=26, End=32),
+        dict(Task="QUANT-BENCH public release",                  S="y2",   Start=28, End=34),
+        dict(Task="ODDS_LIKE predicate",                         S="y2",   Start=24, End=30),
+        dict(Task="Paper 2 — VLDB 2027",                         S="paper",Start=32, End=36),
         # Year 3
-        dict(Task="Unified Engine + WAL Recovery",     Stage="PhD Year 3",Start=34, End=40, S="y3"),
-        dict(Task="Python & R Client SDK",             Stage="PhD Year 3",Start=36, End=42, S="y3"),
-        dict(Task="Adaptive Codebook Refresh",         Stage="PhD Year 3",Start=34, End=38, S="y3"),
-        dict(Task="Practitioner User Study (N=20)",    Stage="PhD Year 3",Start=39, End=44, S="y3"),
-        dict(Task="Paper 3 — SIGMOD 2028",             Stage="PhD Year 3",Start=42, End=46, S="paper"),
+        dict(Task="Own C++ inference engine — replace PyTorch runtime", S="y3", Start=36, End=42),
+        dict(Task="Unified quantdb.so (zero external deps)",     S="y3",   Start=38, End=44),
+        dict(Task="pip install quantdb + CRAN package",          S="y3",   Start=40, End=46),
+        dict(Task="Adaptive codebook refresh",                   S="y3",   Start=36, End=40),
+        dict(Task="Practitioner user study (N=20)",              S="y3",   Start=42, End=46),
+        dict(Task="Paper 3 — SIGMOD 2028",                       S="paper",Start=44, End=48),
         # Year 4
-        dict(Task="QUANT-BENCH Full Evaluation",       Stage="PhD Year 4",Start=46, End=52, S="y4"),
-        dict(Task="Theoretical Analysis + Proofs",     Stage="PhD Year 4",Start=46, End=54, S="y4"),
-        dict(Task="SIGMOD 2029 Demo Submission",       Stage="PhD Year 4",Start=52, End=56, S="paper"),
-        dict(Task="Thesis Write-up & Defence",         Stage="PhD Year 4",Start=50, End=58, S="y4"),
-        # Commercial
-        dict(Task="QUANT-DB Cloud (SaaS Beta)",        Stage="Commercial",Start=58, End=68, S="com"),
-        dict(Task="Enterprise On-Premise Package",     Stage="Commercial",Start=62, End=72, S="com"),
-        dict(Task="SDK — pip + CRAN Release",          Stage="Commercial",Start=60, End=66, S="com"),
-        dict(Task="Open-Core Licensing & Partnerships",Stage="Commercial",Start=66, End=76, S="com"),
+        dict(Task="QUANT-BENCH full evaluation sweep",           S="y4",   Start=48, End=54),
+        dict(Task="Theoretical proofs (HQO optimality + geometry bounds)", S="y4", Start=48, End=56),
+        dict(Task="SIGMOD 2029 Demo Track submission",           S="paper",Start=54, End=58),
+        dict(Task="Thesis write-up and defence",                 S="y4",   Start=52, End=58),
+        # Open-source
+        dict(Task="Apache 2.0 release — PyPI + CRAN + header C++", S="oss", Start=58, End=64),
+        dict(Task="QUANT-BENCH community benchmark server",       S="oss",  Start=60, End=70),
+        dict(Task="Plugin API — custom encoders + predicates",    S="oss",  Start=62, End=72),
     ]
-
+ 
     color_map = {
         "done":  "#26a641",
         "y1":    "#4a90d9",
@@ -2770,13 +3035,10 @@ elif nav == "🗺️ Roadmap to Production":
         "y3":    "#f0a500",
         "y4":    "#3ab86a",
         "paper": "#20c0c0",
-        "com":   "#da3633",
+        "oss":   "#e05a3a",
     }
-
+ 
     fig_gantt = go.Figure()
-    tasks_rev = list(reversed([d["Task"] for d in gantt_data]))
-    y_pos = {t: i for i, t in enumerate(tasks_rev)}
-
     for item in gantt_data:
         fig_gantt.add_trace(go.Bar(
             x=[item["End"] - item["Start"]],
@@ -2785,12 +3047,12 @@ elif nav == "🗺️ Roadmap to Production":
             orientation="h",
             marker=dict(color=color_map[item["S"]], opacity=0.85, line=dict(width=0)),
             showlegend=False,
-            hovertemplate=f"<b>{item['Task']}</b><br>Month {item['Start']}–{item['End']}<br>{item['Stage']}<extra></extra>",
+            hovertemplate=f"<b>{item['Task']}</b><br>Month {item['Start']}–{item['End']}<extra></extra>",
         ))
-
+ 
     milestones = [
-        (8,  "PhD Start"), (20, "Paper 1"), (34, "Paper 2"),
-        (46, "Paper 3"), (58, "Defence"), (68, "Cloud Launch"),
+        (8, "PhD Start"), (20, "Paper 1"), (36, "Paper 2"),
+        (48, "Paper 3"), (58, "Defence &\nRelease"),
     ]
     for month, label in milestones:
         fig_gantt.add_vline(x=month, line_dash="dot", line_color="#ffffff",
@@ -2799,22 +3061,20 @@ elif nav == "🗺️ Roadmap to Production":
             x=month, y=len(gantt_data) - 0.5,
             text=label, showarrow=False,
             font=dict(color="#c9d1d9", size=9),
-            textangle=-55, yanchor="bottom",
-        )
-
+            textangle=-55, yanchor="bottom")
+ 
     fig_gantt.update_xaxes(
-        tickvals=[0, 8, 20, 32, 44, 58, 70, 76],
-        ticktext=["Now", "Y1 Start", "Y1 End", "Y2 End", "Y3 End", "Y4 / Defence", "Y5", "Y6+"],
-        gridcolor="#21262d", gridwidth=1,
-    )
+        tickvals=[0, 8, 20, 36, 48, 58, 70],
+        ticktext=["Now", "Y1 Start", "Y1 End / Y2 Start", "Y2 End / Y3 Start",
+                  "Y3 End / Y4 Start", "Thesis + Release", "Post-PhD"],
+        gridcolor="#21262d", gridwidth=1)
     fig_gantt.update_layout(
-        height=720, paper_bgcolor="#0d1117", plot_bgcolor="#0d1117",
+        height=780, paper_bgcolor="#0d1117", plot_bgcolor="#0d1117",
         font_color="#c9d1d9", barmode="overlay",
-        margin=dict(t=30, b=40, l=270, r=20),
-        yaxis=dict(tickfont=dict(size=11)),
-    )
+        margin=dict(t=30, b=40, l=340, r=20),
+        yaxis=dict(tickfont=dict(size=10)))
     st.plotly_chart(fig_gantt, use_container_width=True)
-
+ 
     st.markdown("""
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
         <div style="display:flex;align-items:center;gap:6px;">
@@ -2842,68 +3102,70 @@ elif nav == "🗺️ Roadmap to Production":
             <span style="color:#a8b8cc;font-size:12px;">Publications</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-            <div style="width:14px;height:14px;border-radius:3px;background:#da3633;"></div>
-            <span style="color:#a8b8cc;font-size:12px;">Commercial</span>
+            <div style="width:14px;height:14px;border-radius:3px;background:#e05a3a;"></div>
+            <span style="color:#a8b8cc;font-size:12px;">Open-source release</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
     st.divider()
-
-    # ── Performance targets ───────────────────────────────────────────────────
-    st.subheader("Performance Targets by Stage")
-    perf_data = {
-        "Metric":           ["Dataset size", "Query latency p50", "Query latency p95",
-                             "Recall@20", "Codebook size K", "Ingestion throughput",
-                             "Concurrent queries"],
-        "Stage 0 (Now)":    ["14K windows",  "0.20 ms",     "0.24 ms",
-                             "1.000",        "256",         "~1K bars/s",    "1 (prototype)"],
-        "PhD Year 1":       ["750K windows", "<0.05 ms",    "<0.10 ms",
-                             "≥0.97",        "1024",        "~10K bars/s",   "Single-node"],
-        "PhD Year 2":       ["50M windows",  "<1 ms",       "<5 ms",
-                             "≥0.95",        "1024",        "~100K bars/s",  "Multi-core"],
-        "PhD Year 3":       ["50M windows",  "<1 ms",       "<5 ms",
-                             "≥0.95",        "Configurable","~500K bars/s",  "Production"],
-        "PhD Year 4":       ["50M+ windows", "<1 ms",       "<5 ms",
-                             "≥0.95",        "Configurable","~500K bars/s",  "Production"],
-        "Commercial":       ["Unlimited",    "<2 ms (API)", "<10 ms (API)",
-                             "≥0.95",        "Configurable",">1M bars/s",    "1000+ (SaaS)"],
-    }
-    st.dataframe(_pd.DataFrame(perf_data).set_index("Metric"), use_container_width=True)
-
-    st.divider()
-
-    # ── Competitive landscape ─────────────────────────────────────────────────
-    st.subheader("Competitive Landscape at Commercial Stage")
+ 
+    # ── Comparative landscape ─────────────────────────────────────────────────
+    st.subheader("Comparative Landscape — Systems vs quantdb Library")
     comp_data = {
-        "System":              ["pgvector", "Pinecone", "Weaviate",
-                                "DTW (UCR Suite)", "InfluxDB", "QuestDB",
-                                "QUANT-DB (Target)"],
-        "SQL Interface":       ["✅", "❌", "❌", "❌", "Partial", "Partial", "✅"],
-        "Shape Search":        ["Cosine/L2 only", "Cosine/L2 only", "Cosine/L2 only",
-                                "✅ (O(N·T²))", "❌", "❌", "✅ PATTERN_LIKE"],
-        "Domain-adapted":      ["❌", "❌", "❌", "❌", "❌", "❌", "✅ OHLCV + Odds"],
-        "Sub-5ms at 50M+":     ["❌", "✅ (generic)", "✅ (generic)",
-                                "❌", "❌", "❌", "✅ (target)"],
-        "Open source":         ["✅", "❌", "✅", "✅", "Partial", "Partial", "Open-core"],
+        "System": [
+            "pgvector", "Pinecone", "Weaviate", "Milvus",
+            "DTW / UCR Suite", "FAISS (standalone)",
+            "quantdb (this work)",
+        ],
+        "SQL shape predicates": [
+            "Cosine/L2 only", "❌", "❌", "❌",
+            "❌", "❌",
+            "✅ PATTERN_LIKE · PATTERN_SEARCH(image) · PATTERN_SEARCH(curve)",
+        ],
+        "Domain-adapted compression": [
+            "❌", "❌", "❌", "❌",
+            "N/A", "❌",
+            "✅ VQ-VAE trained on OHLCV",
+        ],
+        "Cost-based hybrid plan": [
+            "❌ (vector-first always)", "❌", "❌", "Heuristic only",
+            "❌", "❌",
+            "✅ 4 plan types, formal cost model",
+        ],
+        "Image/chart query": [
+            "❌", "❌", "❌", "❌",
+            "❌", "❌",
+            "✅ Year 1 target",
+        ],
+        "External runtime deps": [
+            "PostgreSQL", "Managed cloud", "Weaviate server", "Milvus server",
+            "UCR library", "FAISS + numpy",
+            "Zero (Year 4 target)",
+        ],
+        "Distribution model": [
+            "PG extension", "SaaS only", "Open-source server", "Open-source server",
+            "Academic code", "Open-source lib",
+            "Apache 2.0 — pip + CRAN + header-only C++",
+        ],
     }
-    st.dataframe(
-        _pd.DataFrame(comp_data).set_index("System"),
-        use_container_width=True,
-    )
+    st.dataframe(pd.DataFrame(comp_data).set_index("System"), use_container_width=True)
+ 
     st.markdown("""
-    <div style="background:#0d1117; border:1px solid #30363d; border-radius:8px;
-                padding:14px 18px; margin-top:8px;">
-        <div style="color:#7ec8e3; font-size:12px; font-weight:700; margin-bottom:6px;">
-            Competitive Position</div>
+    <div style="background:#0d1117; border:1.5px solid #20c0c0; border-radius:10px;
+                padding:16px 20px; margin-top:10px;">
+        <div style="color:#70e0e0; font-size:12px; font-weight:700; margin-bottom:8px;">
+            Positioning</div>
         <div style="color:#a8b8cc; font-size:13px; line-height:1.8;">
-            No existing system combines <strong style="color:#e8f0fe;">native SQL shape predicates</strong>,
-            <strong style="color:#e8f0fe;">domain-adapted vector compression</strong>, and
-            <strong style="color:#e8f0fe;">hardware-aware execution</strong> in a single engine.
-            pgvector supports SQL but treats all vectors identically with no concept of financial
-            shape structure. Pinecone and Weaviate are general-purpose and require external preprocessing.
-            DTW is semantically precise but O(N·T²) at scale.
-            QUANT-DB fills the intersection: SQL-native, shape-aware, and sub-millisecond at 50M+ windows.
+            quantdb occupies a gap none of the above fill: a
+            <strong style="color:#e8f0fe;">SQL-native, domain-adapted, cost-optimised,
+            hardware-aware, zero-dependency library</strong> that treats the database
+            engine as a first-class research contribution rather than an application
+            built on top of existing infrastructure. The closest analogies in spirit
+            are PyTorch (which owns its own tensor engine) and DuckDB (which owns its
+            own columnar execution). quantdb does the same for financial time-series
+            pattern search — and unlike those projects, targets Apache 2.0 open-source
+            release as the primary delivery vehicle rather than a commercial product.
         </div>
     </div>
     """, unsafe_allow_html=True)
