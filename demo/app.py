@@ -143,8 +143,39 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
-st.sidebar.image("assets/logo.png", use_container_width=True)
-st.sidebar.markdown("## QUANT-DB")
+import base64
+
+def _img_to_b64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+dark_logo  = _img_to_b64("assets/logo_dark.png")
+light_logo = _img_to_b64("assets/logo_light.png")
+
+st.sidebar.markdown(f"""
+<style>
+  /* shown in dark mode */
+  .logo-dark  {{ display: block; }}
+  .logo-light {{ display: none;  }}
+
+  /* flip when Streamlit switches to light theme */
+  [data-testid="stAppViewContainer"][class*="light"] .logo-dark  {{ display: none;  }}
+  [data-testid="stAppViewContainer"][class*="light"] .logo-light {{ display: block; }}
+
+  @media (prefers-color-scheme: light) {{
+    .logo-dark  {{ display: none;  }}
+    .logo-light {{ display: block; }}
+  }}
+  @media (prefers-color-scheme: dark) {{
+    .logo-dark  {{ display: block; }}
+    .logo-light {{ display: none;  }}
+  }}
+</style>
+<img class="logo-dark"  src="data:image/png;base64,{dark_logo}"  width="220" style="margin-bottom:6px;">
+<img class="logo-light" src="data:image/png;base64,{light_logo}" width="220" style="margin-bottom:6px;">
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("*Semantic Financial Pattern Search*")
 st.sidebar.markdown("*Semantic Financial Pattern Search*")
 st.sidebar.divider()
 
