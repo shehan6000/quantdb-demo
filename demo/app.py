@@ -143,6 +143,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
+st.sidebar.image("assets/logo.png", use_container_width=True)
 st.sidebar.markdown("## QUANT-DB")
 st.sidebar.markdown("*Semantic Financial Pattern Search*")
 st.sidebar.divider()
