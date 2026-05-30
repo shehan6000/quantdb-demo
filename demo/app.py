@@ -144,8 +144,6 @@ st.markdown("""
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
 st.sidebar.image("assets/logo.png", use_container_width=True)
-st.sidebar.markdown("## QUANT-DB")
-st.sidebar.markdown("*Semantic Financial Pattern Search*")
 st.sidebar.divider()
 
 nav = st.sidebar.radio(
