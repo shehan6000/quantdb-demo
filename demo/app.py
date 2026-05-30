@@ -144,7 +144,6 @@ st.markdown("""
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
 st.sidebar.image("assets/logo.png", use_container_width=True)
-st.sidebar.divider()
 
 nav = st.sidebar.radio(
     "**Navigation**",
