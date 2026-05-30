@@ -159,7 +159,7 @@ A research database engine that extends SQL with semantic shape predicates over 
 Given a query pattern, QUANT-DB retrieves historically similar windows ranked by latent-space distance.
 
 Built as a pre-PhD prototype; the roadmap tab shows the full path from this working system through
-PhD completion to commercial deployment.
+PhD completion to open-source deployment.
 """)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
