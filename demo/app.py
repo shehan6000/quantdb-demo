@@ -2402,7 +2402,7 @@ elif nav == "🎓 Research Contributions":
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  
 elif nav == "🗺️ Roadmap to Production":
-    st.title("quantdb — Development Roadmap")
+    st.title("Development Roadmap")
     st.markdown(
         "This page maps the complete development arc: from the current working prototype "
         "that depends on FAISS, DuckDB, and PyTorch, through four years of PhD research "
