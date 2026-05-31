@@ -814,7 +814,7 @@ LIMIT    20;
     with st.expander("8 · End-to-End — What Happens When You Run a Query"):
         steps_e2e = [
             ("User input",
-             "The analyst draws or pastes a 60-bar OHLCV pattern into the Streamlit interface "
+             "The analyst draws or pastes a 60-bar OHLCV pattern (currently selects a query pattern from a set of pre-built templates)into the Streamlit interface "
              "and writes SQL with the `PATTERN_LIKE` predicate."),
             ("Parse SQL",
              "`src/query/parser.py` reads the SQL and extracts the query window, "
