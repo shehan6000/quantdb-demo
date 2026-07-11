@@ -272,7 +272,7 @@ if nav == "🏠 Overview":
     st.divider()
 
     # Architecture flow
-    st.subheader("🏗️ System Architecture at a Glance")
+    st.subheader("🏗️ Stage 0 :System Architecture at a Glance")
     st.markdown("""
     The diagram below shows how QUANT-DB transforms raw OHLCV price data
     into a searchable compressed index, and how a user query flows back through it.
