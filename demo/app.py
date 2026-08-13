@@ -158,7 +158,7 @@ st.sidebar.markdown("""
 A research database engine that extends SQL with semantic shape predicates over financial time-series.
 Given a query pattern, QUANT-DB retrieves historically similar windows ranked by latent-space distance.
 
-Built as a pre-PhD prototype; the roadmap tab shows the full path from this working system through
+Built as a pre-doctoral prototype; the roadmap tab shows the full path from this working system through
 PhD completion to open-source deployment.
 """)
 
@@ -253,7 +253,7 @@ def _candlestick_fig(close, title="Price Window", height=220):
 if nav == "🏠 Overview":
     st.title("QUANT-DB — Semantic Financial Pattern Search")
     st.markdown("""
-    **QUANT-DB** is a PhD research prototype: a vector database purpose-built for financial time-series
+    **QUANT-DB** is a doctoral research prototype: a vector database purpose-built for financial time-series
     that supports semantic shape search via a SQL extension called `PATTERN_LIKE`.
     The system compresses OHLCV windows using a domain-adapted VQ-VAE, indexes them with HNSW,
     and executes hybrid vector-relational queries through a cost-based optimizer.
