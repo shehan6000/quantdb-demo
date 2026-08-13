@@ -391,7 +391,7 @@ if nav == "🏠 Overview":
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 elif nav == "📖 How It Works":
-    st.title("📖 How It Works — Plain-English Technical Guide")
+    st.title("📖 How It Works ")
     st.markdown("""
     This guide explains every concept inside QUANT-DB in clear, structured language.
     It is intended for supervisors and reviewers who want to understand the full system
