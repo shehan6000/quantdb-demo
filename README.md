@@ -53,7 +53,8 @@ A working prototype exists prior to formal research commencement. All figures be
 **Stack:** PyTorch (VQ-VAE) · FAISS HNSW (m=16, ef_construction=200) · HybridQueryOptimizer + GeometricEstimator · Layer3Engine (DistanceTable, BitScanKernel) · DuckDB (`PATTERN_LIKE`, `SIMILARITY_SCORE` UDFs) · FastAPI backend · Streamlit demo (six tabs)
 
 
-- Wang et al. (2021), *Milvus: A purpose-built vector data management system*, SIGMOD.
+
+https://quantdb-demo.streamlit.app/
 
 ---
 
